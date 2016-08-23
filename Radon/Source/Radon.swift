@@ -122,6 +122,7 @@ public class Radon<S: RadonStore, T:Syncable> {
     public var externUpdateBlock: ((syncable: S.T) -> ())? = nil
     public var internUpdateBlock: ((syncable: S.T) -> ())? = nil
     
+    //TODO: rname to recordName
     public var externDeletionBlock: ((deletedRecordID: String?) -> ())? = nil
     public var internDeletionBlock: ((deletedRecordID: String?) -> ())? = nil
     
@@ -330,25 +331,6 @@ public class Radon<S: RadonStore, T:Syncable> {
 
     }
     
-    private func recordForRecordName(recordName: String, success: (record: CKRecord) -> (), failure: (error: NSError) -> ()) {
-        let recordID = CKRecordID(recordName: recordName, zoneID: syncableRecordZone.zoneID)
-        
-        let fetchOperation = CKFetchRecordsOperation(recordIDs: [recordID])
-        fetchOperation.database = self.privateDatabase
-        fetchOperation.rad_setFetchRecordsCompletionBlock(inQueue: self.queue, fetchRecordsCompletionBlock: { recordsDictionary, error in
-            if let record = recordsDictionary?[recordID] {
-                success(record: record)
-                return
-            }
-            if let error = error {
-                failure(error: error)
-                return
-            }
-        })
-        
-        fetchOperation.start()
-    }
-    
     public func updateObject(updateBlock: () -> (S.T), completion: CompletionBlock) {
         dispatch_async(self.queue) { () -> Void in
             let updatedObject = self.store.updateObject(updateBlock)()
@@ -391,44 +373,37 @@ public class Radon<S: RadonStore, T:Syncable> {
     
     public func handleQueryNotification(queryNotification: CKQueryNotification) {
         
-        guard let recordName = queryNotification.recordID?.recordName else {
-            return
-        }
+        guard let recordID = queryNotification.recordID else { return }
         
+        //TODO: move out queryNotificationReason handling to make it testable
         switch queryNotification.queryNotificationReason {
         case .RecordCreated:
-            self.recordForRecordName(recordName, success: { (record) -> () in
+            self.interface.fetchRecord(recordID, onQueue: self.queue, fetchRecordsCompletionBlock: { (record, error) in
+                guard let record = record else { return }
                 if let dictionary = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType: S.T.self),
-                   let syncable = self.store.newObjectFromDictionary(dictionary) {
+                    let syncable = self.store.newObjectFromDictionary(dictionary) {
                     self.store.setRecordName(record.recordID.recordName, forObject: syncable)
                     self.store.setSyncStatus(true, forObject: syncable)
                     self.externInsertBlock?(syncable: syncable)
                 }
-            }, failure: { (error) -> () in
-                
             })
-            
             
             return
         case .RecordUpdated:
-            self.recordForRecordName(recordName, success: { (record) -> () in
-                if  let syncable = self.store.objectWithIdentifier(recordName),
+            self.interface.fetchRecord(recordID, onQueue: self.queue, fetchRecordsCompletionBlock: { (record, error) in
+                guard let record = record else { return }
+                if  let syncable = self.store.objectWithIdentifier(recordID.recordName),
                     let dictionary = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType:T.self) {
-                        self.store.updateObject(syncable, withDictionary: dictionary)
-                        self.externUpdateBlock?(syncable: syncable)
+                    self.store.updateObject(syncable, withDictionary: dictionary)
+                    self.externUpdateBlock?(syncable: syncable)
                 }
-                
-            }, failure: { (error) -> () in
-                
             })
             
             return
-            
-            
         case .RecordDeleted:
-            if let syncable = self.store.objectWithIdentifier(recordName) {
+            if let syncable = self.store.objectWithIdentifier(recordID.recordName) {
                 self.store.deleteObject(syncable)
-                self.externDeletionBlock?(deletedRecordID: recordName)
+                self.externDeletionBlock?(deletedRecordID: recordID.recordName)
             }
             return
         }
