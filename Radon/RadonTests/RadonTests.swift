@@ -195,6 +195,27 @@ class RadonTests: XCTestCase {
         waitForExpectationsWithTimeout(5, handler: nil)
     }
     
+    func testHandleQueryNotificationReasonUpdated() {
+        let testObject = TestClass(string: "hi", int: 1, double: 1)
+        testObject.internRecordID = "123"
+        store.addObject(testObject)
+        XCTAssert(store.objectWithIdentifier(testObject.internRecordID) != nil)
+        let recordID = CKRecordID(recordName: "123")
+        radon.handleQueryNotificationReason(.RecordUpdated, forRecordID: recordID)
+        XCTAssert(testObject.string == "Mock")
+    }
+    
+    func testHandleQueryNotificationReasonUpdatedRecordNotFound() {
+        let testObject = TestClass(string: "hi", int: 1, double: 1)
+        testObject.internRecordID = "123"
+        store.addObject(testObject)
+        XCTAssert(store.objectWithIdentifier(testObject.internRecordID) != nil)
+        let recordID = CKRecordID(recordName: "123")
+        mockInterface.failsFetchRecord = true
+        radon.handleQueryNotificationReason(.RecordUpdated, forRecordID: recordID)
+        XCTAssert(testObject.string == "hi")
+    }
+    
     
 //    func testServerChangeToken() {
 //        let mockInterface = MockCloudKitInterface()

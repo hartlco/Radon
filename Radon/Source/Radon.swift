@@ -374,9 +374,11 @@ public class Radon<S: RadonStore, T:Syncable> {
     public func handleQueryNotification(queryNotification: CKQueryNotification) {
         
         guard let recordID = queryNotification.recordID else { return }
-        
-        //TODO: move out queryNotificationReason handling to make it testable
-        switch queryNotification.queryNotificationReason {
+        self.handleQueryNotificationReason(queryNotification.queryNotificationReason, forRecordID: recordID)
+    }
+    
+    internal func handleQueryNotificationReason(reason: CKQueryNotificationReason, forRecordID recordID: CKRecordID) {
+        switch reason {
         case .RecordCreated:
             self.interface.fetchRecord(recordID, onQueue: self.queue, fetchRecordsCompletionBlock: { (record, error) in
                 guard let record = record else { return }
@@ -391,7 +393,8 @@ public class Radon<S: RadonStore, T:Syncable> {
             return
         case .RecordUpdated:
             self.interface.fetchRecord(recordID, onQueue: self.queue, fetchRecordsCompletionBlock: { (record, error) in
-                guard let record = record else { return }
+                guard let record = record else {
+                    return }
                 if  let syncable = self.store.objectWithIdentifier(recordID.recordName),
                     let dictionary = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType:T.self) {
                     self.store.updateObject(syncable, withDictionary: dictionary)
