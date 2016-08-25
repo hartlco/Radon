@@ -2,7 +2,7 @@
 //  Radon.swift
 //  Radon
 //
-//  Created by mhaddl on 01/11/15.
+//  Created by hartlco on 01/11/15.
 //  Copyright © 2015 Martin Hartl. All rights reserved.
 //
 
@@ -26,62 +26,6 @@ extension NSDate {
         }
         
         return self.compare(date) == .OrderedAscending
-    }
-}
-
-public protocol Syncable {
-    static func propertyNamesToSync() -> [String]
-}
-
-public protocol RadonStore {
-    associatedtype T:Syncable
-    
-    func allPropertiesForObject(object: T) -> [String:Any]
-    func recordNameForObject(object: T) -> String?
-    func newObject(newObjectBlock: ((newObject: T) -> (T))) -> () -> (T)
-    
-    /// local update, values come from user, local modification date needs to be updated
-    func updateObject(objectUpdateBlock: () -> (T)) -> (() -> (T))
-    func objectWithIdentifier(identifier: String?) -> T?
-    func newObjectFromDictionary(dictionary: [String:Any]) -> T?
-    func deleteObject(object: T)
-    func allUnsyncedObjects() -> [T]
-    
-    /// external update, new values come from server and need to update local model
-    func updateObject(object: T, withDictionary dictionary: [String:Any])
-    func setRecordName(recordName: String?, forObject object: T)
-    func setSyncStatus(syncStatus: Bool, forObject object: T)
-    func setModificationDate(modificationDate: NSDate?, forObject object: T)
-    func modificationDateForObject(object: T) -> NSDate
-}
-
-public extension CKRecord {
-    
-    public convenience init(dictionary: [String:Any], recordType: String, zoneName: String) {
-        self.init(recordType: recordType, zoneID: CKRecordZone(zoneName: zoneName).zoneID)
-        self.updateWithDictionary(dictionary)
-    }
-    
-    public func updateWithDictionary(dictionary: [String:Any]) {
-        for (key, value) in dictionary {
-            if let value = value as? CKRecordValue {
-                self.setObject(value, forKey: key)
-            }
-        }
-    }
-    
-    public func valuesDictionaryForKeys(keys: [String], syncableType: Syncable.Type) -> [String:Any]? {
-        var allValues = [String:Any]()
-        allValues["modificationDate"] = self.modificationDate
-        for key in keys {
-            if let valuesFromRecord = self.valueForKey(key) {
-                allValues[key] = valuesFromRecord
-            } else {
-                return nil
-            }
-        }
-        
-        return allValues
     }
 }
 
@@ -117,14 +61,11 @@ public class Radon<S: RadonStore, T:Syncable> {
     public var queue: dispatch_queue_t = dispatch_get_main_queue()
     
     public var externInsertBlock: ((syncable: S.T) -> ())? = nil
-    public var internInsertBlock: ((syncable: S.T) -> ())? = nil
     
     public var externUpdateBlock: ((syncable: S.T) -> ())? = nil
-    public var internUpdateBlock: ((syncable: S.T) -> ())? = nil
     
-    //TODO: rname to recordName
+    //TODO: rename to recordName
     public var externDeletionBlock: ((deletedRecordID: String?) -> ())? = nil
-    public var internDeletionBlock: ((deletedRecordID: String?) -> ())? = nil
     
     public var defaultsStoreable: DefaultsStoreable = NSUserDefaults.standardUserDefaults()
     
@@ -178,89 +119,170 @@ public class Radon<S: RadonStore, T:Syncable> {
     }
     
     
+    // MARK: - Public methods
+    
+    
     /**
      Sync starts the general sync process. It loads recent changes and deletions from the backend and upload previously not synced objects to the backend.
      
+     - parameter error: Error block that may execute if an error during the sync occurs
      - parameter completion: The completionBlock, containing an optional NSError object, that is triggered when the operation finishes
      */
     public func sync(error: ErrorBlock, completion: CompletionBlock) {
         self.syncWithToken(self.syncToken, errorBlock: error, completion: completion)
     }
     
+    
+    /**
+     Creates a new object that is available in the 'newObjectBlock'. Changes made to the object in this block are stored in the local store and
+        uploaded to the CloudKit server.
+     
+     - parameter newObjectBlock: Block that provides a  new object. After changing the object in needs to be return in the block
+     - parameter completion: Block that is executed after the object was sucessfully created in the CloudKit backend
+ 
+     */
+    public func createObject(newObjectBlock: ((newObject: S.T) -> (S.T)), completion: CompletionBlock) {
+        let newObject = self.store.newObject(newObjectBlock)()
+        self.createRecord(newObject, completion: completion)
+    }
+    
+    
+    /**
+     
+ 
+     */
+    public func updateObject(updateBlock: () -> (S.T), completion: CompletionBlock) {
+        dispatch_async(self.queue) { () -> Void in
+            let updatedObject = self.store.updateObject(updateBlock)()
+            self.store.setModificationDate(NSDate(), forObject: updatedObject)
+            self.store.setSyncStatus(false, forObject: updatedObject)
+            self.recordForObject(updatedObject, success: { (record) -> () in
+                let dictionary = self.store.allPropertiesForObject(updatedObject)
+                record.updateWithDictionary(dictionary)
+                self.interface.modifyRecord(record, onQueue: self.queue, modifyRecordsCompletionBlock: { (records, recordIDs, error) in
+                    if let _ = records {
+                        self.store.setSyncStatus(true, forObject: updatedObject)
+                    }
+                    
+                    completion(error: error)
+                })
+                
+            }) { (error) -> () in
+                completion(error: error)
+            }
+        }
+    }
+    
+    public func deleteObject(object: S.T, completion: CompletionBlock) {
+        let recordName = self.store.recordNameForObject(object)
+        self.store.deleteObject(object)
+        if let recordName = recordName {
+            self.deleteRecord(recordName, completion: completion)
+        }
+    }
+    
+    public func handleQueryNotification(queryNotification: CKQueryNotification) {
+        guard let recordID = queryNotification.recordID else { return }
+        self.handleQueryNotificationReason(queryNotification.queryNotificationReason, forRecordID: recordID)
+    }
+    
+    public func checkIfiCloudUserChanged(success: (userStatus: RadoniCloudUserState) -> ()) {
+        self.container.fetchUserRecordIDWithCompletionHandler { (recordID, error) -> Void in
+            guard let currentUserID = self.loadUserID() else {
+                self.saveUserID(recordID?.recordName)
+                success(userStatus: .FirstSync)
+                return
+            }
+            
+            if let recordID = recordID?.recordName where recordID == currentUserID {
+                success(userStatus: .AlreadySynced)
+                return
+            } else {
+                self.saveUserID(recordID?.recordName)
+                success(userStatus: .Changed)
+                return
+            }
+        }
+    }
+    
+    // MARK: - Internal methods for Unit tests
+    
+    internal func handleRecordChangeInSync(record: CKRecord) {
+        if let offlineObject = self.store.objectWithIdentifier(record.recordID.recordName) {
+            if self.store.modificationDateForObject(offlineObject).isEarlierThan(record.modificationDate)  {
+                // Local object needs to be updated with server record
+                let dict = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType:T.self)
+                self.store.setModificationDate(record.modificationDate, forObject: offlineObject)
+                self.store.setSyncStatus(true, forObject: offlineObject)
+                self.store.updateObject(offlineObject, withDictionary: dict)
+                self.externUpdateBlock?(syncable: offlineObject)
+            } else  {
+                // Local version of the object is newer than the server version. Mark it as unsynced so it will be synced in the end.
+                self.store.setSyncStatus(false, forObject: offlineObject)
+            }
+            
+        } else {
+            // Create local version as it is not yet present on the device
+            let dict = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType:T.self)
+            let newObject = self.store.newObjectFromDictionary(dict)
+            self.store.setModificationDate(record.modificationDate, forObject: newObject)
+            self.store.setRecordName(record.recordID.recordName, forObject: newObject)
+            self.store.setSyncStatus(true, forObject: newObject)
+            self.externInsertBlock?(syncable: newObject)
+        }
+    }
+    
+    internal func handleUnsyncedObjectsInSync(completion completion: (errors: [NSError]) -> ()) {
+        let dispatchGroup = dispatch_group_create()
+        var errors = [NSError]()
+        
+        for object in self.store.allUnsyncedObjects() {
+            dispatch_group_enter(dispatchGroup)
+            if self.store.recordNameForObject(object) == nil {
+                // Record was not yet transfered to the server and will now be created
+                self.createRecord(object, completion: { (error) -> () in
+                    if let error = error { errors.append(error) }
+                    dispatch_group_leave(dispatchGroup)
+                })
+            } else {
+                // Object was marked unsyned during an update, the server record will now be updated with new data
+                self.updateObject({ () -> S.T in
+                    return object
+                    }, completion: { (error) -> () in
+                        if let error = error { errors.append(error) }
+                        dispatch_group_leave(dispatchGroup)
+                })
+            }
+        }
+        
+        dispatch_group_notify(dispatchGroup, self.queue, {
+            completion(errors: errors)
+        })
+    }
+    
+    // MARK: - Private methods
+    
     private func syncWithToken(token: CKServerChangeToken?, errorBlock:ErrorBlock, completion: CompletionBlock) {
         isSyncing = true
-        let dispatchGroup = dispatch_group_create()
+        
         let fetchRecordChangesOperation = CKFetchRecordChangesOperation(recordZoneID: syncableRecordZone.zoneID, previousServerChangeToken: token)
         fetchRecordChangesOperation.database = self.privateDatabase
         
         fetchRecordChangesOperation.rad_setRecordChangedBlock(onQueue: self.queue) { record in
-            
-            if  let offlineObject = self.store.objectWithIdentifier(record.recordID.recordName) {
-                if let dict = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType:T.self) where self.store.modificationDateForObject(offlineObject).isEarlierThan(record.modificationDate)  {
-                    // Local obect needs to be updated with server record
-                    self.store.setModificationDate(record.modificationDate, forObject: offlineObject)
-                    self.store.setSyncStatus(true, forObject: offlineObject)
-                    self.store.updateObject(offlineObject, withDictionary: dict)
-                    self.externUpdateBlock?(syncable: offlineObject)
-                } else  {
-                    // Local version of the object is newer than the server version, update server record instead of local object.
-                    dispatch_group_enter(dispatchGroup)
-                    self.updateObject({ () -> S.T in
-                        return offlineObject
-                    }, completion: { (error) in
-                        if let error = error { errorBlock(error: error) }
-                        dispatch_group_leave(dispatchGroup)
-                    })
-                }
-                
-                
-            } else {
-                // Create local version as it is not yet present on the device
-                if let dict = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType:T.self),
-                    let newObject = self.store.newObjectFromDictionary(dict) {
-                        self.store.setModificationDate(record.modificationDate, forObject: newObject)
-                        self.store.setRecordName(record.recordID.recordName, forObject: newObject)
-                        self.store.setSyncStatus(true, forObject: newObject)
-                        self.externInsertBlock?(syncable: newObject)
-                }
-            }
+            self.handleRecordChangeInSync(record)
         }
         
         fetchRecordChangesOperation.rad_setRecordWithIDWasDeletedBlock(onQueue: self.queue) { id in
-            guard let offlineObject = self.store.objectWithIdentifier(id.recordName) else {
-                return
-            }
-            
+            guard let offlineObject = self.store.objectWithIdentifier(id.recordName) else { return }
             let recordName = String(id.recordName)
             self.store.deleteObject(offlineObject)
             self.externDeletionBlock?(deletedRecordID: recordName)
         }
         
         fetchRecordChangesOperation.rad_setFetchRecordChangesCompletionBlock(onQueue: self.queue) { token, data, error in
-            
-            let allUnsyncedObjects = self.store.allUnsyncedObjects()
-            for object in allUnsyncedObjects {
-                dispatch_group_enter(dispatchGroup)
-                if self.store.recordNameForObject(object) == nil {
-                    // Record was not yet transfered to the server and will now be created
-                    
-                    self.createRecord(object, completion: { (error) -> () in
-                        if let error = error { errorBlock(error: error) }
-                        dispatch_group_leave(dispatchGroup)
-                    })
-                } else {
-                    // Object was marked unsyned during an update, the server record will now be updated with new data
-                    
-                    self.updateObject({ () -> S.T in
-                        return object
-                    }, completion: { (error) -> () in
-                        if let error = error { errorBlock(error: error) }
-                        dispatch_group_leave(dispatchGroup)
-                    })
-                }
-            }
-            
-            dispatch_group_notify(dispatchGroup, self.queue, {
+            self.handleUnsyncedObjectsInSync(completion: { errors in
+                //TODO: handle errors array
+                
                 self.syncToken = token
                 if error?.code == CKErrorCode.ChangeTokenExpired.rawValue {
                     self.syncToken = nil
@@ -279,12 +301,6 @@ public class Radon<S: RadonStore, T:Syncable> {
         
         fetchRecordChangesOperation.start()
 
-    }
-    
-    public func createObject(newObjectBlock: ((newObject: S.T) -> (S.T)), syncCompletion: CompletionBlock) {
-        let newObject = self.store.newObject(newObjectBlock)()
-        self.internInsertBlock?(syncable: newObject)
-        self.createRecord(newObject, completion: syncCompletion)
     }
     
     private func createRecord(object: S.T, completion: CompletionBlock) {
@@ -331,39 +347,6 @@ public class Radon<S: RadonStore, T:Syncable> {
 
     }
     
-    public func updateObject(updateBlock: () -> (S.T), completion: CompletionBlock) {
-        dispatch_async(self.queue) { () -> Void in
-            let updatedObject = self.store.updateObject(updateBlock)()
-            self.store.setModificationDate(NSDate(), forObject: updatedObject)
-            self.internUpdateBlock?(syncable: updatedObject)
-            self.store.setSyncStatus(false, forObject: updatedObject)
-            self.recordForObject(updatedObject, success: { (record) -> () in
-                let dictionary = self.store.allPropertiesForObject(updatedObject)
-                record.updateWithDictionary(dictionary)
-                self.interface.modifyRecord(record, onQueue: self.queue, modifyRecordsCompletionBlock: { (records, recordIDs, error) in
-                    if let _ = records {
-                        self.store.setSyncStatus(true, forObject: updatedObject)
-                    }
-                    
-                    completion(error: error)
-                })
-                
-            }) { (error) -> () in
-                completion(error: error)
-            }
-        }
-    }
-    
-    public func deleteObject(object: S.T, completion: CompletionBlock) {
-        let recordName = self.store.recordNameForObject(object)
-        self.store.deleteObject(object)
-        self.internDeletionBlock?(deletedRecordID: recordName)
-        if let recordName = recordName {
-            self.deleteRecord(recordName, completion: completion)
-        }
-        
-    }
-    
     private func deleteRecord(recordName: String, completion: CompletionBlock) {
         let recordID = CKRecordID(recordName: recordName, zoneID: self.syncableRecordZone.zoneID)
         interface.deleteRecordWithID(recordID, onQueue: self.queue) { (error) in
@@ -371,32 +354,24 @@ public class Radon<S: RadonStore, T:Syncable> {
         }
     }
     
-    public func handleQueryNotification(queryNotification: CKQueryNotification) {
-        
-        guard let recordID = queryNotification.recordID else { return }
-        self.handleQueryNotificationReason(queryNotification.queryNotificationReason, forRecordID: recordID)
-    }
-    
     internal func handleQueryNotificationReason(reason: CKQueryNotificationReason, forRecordID recordID: CKRecordID) {
         switch reason {
         case .RecordCreated:
             self.interface.fetchRecord(recordID, onQueue: self.queue, fetchRecordsCompletionBlock: { (record, error) in
                 guard let record = record else { return }
-                if let dictionary = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType: S.T.self),
-                    let syncable = self.store.newObjectFromDictionary(dictionary) {
-                    self.store.setRecordName(record.recordID.recordName, forObject: syncable)
-                    self.store.setSyncStatus(true, forObject: syncable)
-                    self.externInsertBlock?(syncable: syncable)
-                }
+                let dictionary = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType: S.T.self)
+                let syncable = self.store.newObjectFromDictionary(dictionary)
+                self.store.setRecordName(record.recordID.recordName, forObject: syncable)
+                self.store.setSyncStatus(true, forObject: syncable)
+                self.externInsertBlock?(syncable: syncable)
             })
             
             return
         case .RecordUpdated:
             self.interface.fetchRecord(recordID, onQueue: self.queue, fetchRecordsCompletionBlock: { (record, error) in
-                guard let record = record else {
-                    return }
-                if  let syncable = self.store.objectWithIdentifier(recordID.recordName),
-                    let dictionary = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType:T.self) {
+                guard let record = record else { return }
+                if  let syncable = self.store.objectWithIdentifier(recordID.recordName) {
+                    let dictionary = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType:T.self)
                     self.store.updateObject(syncable, withDictionary: dictionary)
                     self.externUpdateBlock?(syncable: syncable)
                 }
@@ -411,27 +386,6 @@ public class Radon<S: RadonStore, T:Syncable> {
             return
         }
     }
-    
-    
-    public func checkIfiCloudUserChanged(success: (userStatus: RadoniCloudUserState) -> ()) {
-        self.container.fetchUserRecordIDWithCompletionHandler { (recordID, error) -> Void in
-            guard let currentUserID = self.loadUserID() else {
-                self.saveUserID(recordID?.recordName)
-                success(userStatus: .FirstSync)
-                return
-            }
-            
-            if let recordID = recordID?.recordName where recordID == currentUserID {
-                success(userStatus: .AlreadySynced)
-                return
-            } else {
-                self.saveUserID(recordID?.recordName)
-                success(userStatus: .Changed)
-                return
-            }
-        }
-    }
-    
     
     // MARK: - Private notification handling methods
     

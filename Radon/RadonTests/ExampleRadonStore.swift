@@ -53,12 +53,11 @@ class ExampleRadonStore: RadonStore {
         }
     }
     
-    func newObjectFromDictionary(dictionary: [String : Any]) -> T? {
+    func newObjectFromDictionary(dictionary: [String : Any]) -> T {
         let newObject = T(dictionary: dictionary)
-        if let newObject = newObject {
-            self.addObject(newObject)
-        }
-        return newObject
+        guard let object = newObject else { fatalError("Can't initializes object from dictionary") }
+        self.addObject(object)
+        return object
     }
     
     func objectWithIdentifier(identifier: String?) -> T? {
