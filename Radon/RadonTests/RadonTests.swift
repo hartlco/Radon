@@ -111,12 +111,7 @@ class RadonTests: XCTestCase {
     func testUpdateObjectError() {
         let expectation = self.expectationWithDescription("Update Object")
         
-        let mockInterface = MockCloudKitInterface()
         mockInterface.failsCreateRecord = true
-        let store = ExampleRadonStore()
-        let radon = Radon<ExampleRadonStore, TestClass>(store: store, interface: mockInterface) { (error) in
-            XCTFail()
-        }
         let testObject = TestClass(string: "", int: 0, double: 0)
         store.addObject(testObject)
         XCTAssert(testObject.internSyncStatus == false)
@@ -214,6 +209,16 @@ class RadonTests: XCTestCase {
         mockInterface.failsFetchRecord = true
         radon.handleQueryNotificationReason(.RecordUpdated, forRecordID: recordID)
         XCTAssert(testObject.string == "hi")
+    }
+    
+    func testHandleQueryNotificationReasonDelete() {
+        let testObject = TestClass(string: "hi", int: 1, double: 1)
+        testObject.internRecordID = "123"
+        store.addObject(testObject)
+        XCTAssert(store.objectWithIdentifier(testObject.internRecordID) != nil)
+        let recordID = CKRecordID(recordName: "123")
+        radon.handleQueryNotificationReason(.RecordDeleted, forRecordID: recordID)
+        XCTAssert(store.objectWithIdentifier(testObject.internRecordID) == nil)
     }
     
     
