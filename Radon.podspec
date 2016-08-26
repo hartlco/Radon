@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'Radon'
-  s.version = '0.1.0'
+  s.version = '0.1.1'
   s.license = 'MIT'
   s.summary = 'Simple CloudKit model syncing'
   s.homepage = 'https://github.com/hartlco/Radon'
