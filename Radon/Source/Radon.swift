@@ -173,7 +173,7 @@ public class Radon<S: RadonStore, T:Syncable> {
         self.subscribeToItemUpdates()
     }
     
-    convenience init(store: S, cloudKitIdentifier: String) {
+    public convenience init(store: S, cloudKitIdentifier: String) {
         self.init(store: store, interface: RadonCloudKit(cloudKitIdentifier: cloudKitIdentifier, recordZoneName: String(T)), recordZoneErrorBlock: nil)
     }
     
