@@ -209,6 +209,7 @@ public class Radon<S: RadonStore, T:Syncable> {
     
     internal func handleRecordChangeInSync(record: CKRecord) {
         if let offlineObject = self.store.objectWithIdentifier(record.recordID.recordName) {
+            //TODO: Add optional conflict block to handle this situation
             if self.store.modificationDateForObject(offlineObject).isEarlierThan(record.modificationDate)  {
                 // Local object needs to be updated with server record
                 let dict = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType:T.self)
@@ -223,12 +224,7 @@ public class Radon<S: RadonStore, T:Syncable> {
             
         } else {
             // Create local version as it is not yet present on the device
-            let dict = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType:T.self)
-            let newObject = self.store.newObjectFromDictionary(dict)
-            self.store.setModificationDate(record.modificationDate, forObject: newObject)
-            self.store.setRecordName(record.recordID.recordName, forObject: newObject)
-            self.store.setSyncStatus(true, forObject: newObject)
-            self.externInsertBlock?(syncable: newObject)
+            self.insertObject(fromRecord: record)
         }
     }
     
@@ -354,26 +350,31 @@ public class Radon<S: RadonStore, T:Syncable> {
         }
     }
     
+    private func insertObject(fromRecord record:CKRecord) {
+        let dictionary = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType:T.self)
+        let newObject = self.store.newObjectFromDictionary(dictionary)
+        self.store.setModificationDate(record.modificationDate, forObject: newObject)
+        self.store.setRecordName(record.recordID.recordName, forObject: newObject)
+        self.store.setSyncStatus(true, forObject: newObject)
+        self.externInsertBlock?(syncable: newObject)
+    }
+    
     internal func handleQueryNotificationReason(reason: CKQueryNotificationReason, forRecordID recordID: CKRecordID) {
         switch reason {
         case .RecordCreated:
-            self.interface.fetchRecord(recordID, onQueue: self.queue, fetchRecordsCompletionBlock: { (record, error) in
+            self.interface.fetchRecord(recordID, onQueue: self.queue, fetchRecordsCompletionBlock: { [weak self] (record, error) in
                 guard let record = record else { return }
-                let dictionary = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType: S.T.self)
-                let syncable = self.store.newObjectFromDictionary(dictionary)
-                self.store.setRecordName(record.recordID.recordName, forObject: syncable)
-                self.store.setSyncStatus(true, forObject: syncable)
-                self.externInsertBlock?(syncable: syncable)
+                self?.insertObject(fromRecord: record)
             })
             
             return
         case .RecordUpdated:
-            self.interface.fetchRecord(recordID, onQueue: self.queue, fetchRecordsCompletionBlock: { (record, error) in
+            self.interface.fetchRecord(recordID, onQueue: self.queue, fetchRecordsCompletionBlock: { [weak self] (record, error) in
                 guard let record = record else { return }
-                if  let syncable = self.store.objectWithIdentifier(recordID.recordName) {
+                if  let syncable = self?.store.objectWithIdentifier(recordID.recordName) {
                     let dictionary = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType:T.self)
-                    self.store.updateObject(syncable, withDictionary: dictionary)
-                    self.externUpdateBlock?(syncable: syncable)
+                    self?.store.updateObject(syncable, withDictionary: dictionary)
+                    self?.externUpdateBlock?(syncable: syncable)
                 }
             })
             
