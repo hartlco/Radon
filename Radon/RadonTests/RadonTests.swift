@@ -221,6 +221,21 @@ class RadonTests: XCTestCase {
         XCTAssert(store.objectWithIdentifier(testObject.internRecordID) == nil)
     }
     
+    func testHandleQueryNotificationReasonRecordCreated() {
+        XCTAssert(store.objectWithIdentifier("Mock") == nil)
+        let recordID = CKRecordID(recordName: "Mock")
+        radon.handleQueryNotificationReason(.RecordCreated, forRecordID: recordID)
+        XCTAssert(store.objectWithIdentifier("Mock") != nil)
+    }
+    
+    func testHandleQueryNotificationReasonRecordCreatedRecordNotFound() {
+        XCTAssert(store.objectWithIdentifier("Mock") == nil)
+        mockInterface.failsFetchRecord = true
+        let recordID = CKRecordID(recordName: "Mock")
+        radon.handleQueryNotificationReason(.RecordCreated, forRecordID: recordID)
+        XCTAssert(store.objectWithIdentifier("Mock") == nil)
+    }
+    
     
 //    func testServerChangeToken() {
 //        let mockInterface = MockCloudKitInterface()
