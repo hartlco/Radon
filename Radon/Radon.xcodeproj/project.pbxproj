@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		4B25B4BF1CDD1CAF00897DCF /* RadonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B25B4BE1CDD1CAF00897DCF /* RadonTests.swift */; };
 		4B25B4C71CDD1CC900897DCF /* MockCloudKitInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B25B4C61CDD1CC900897DCF /* MockCloudKitInterface.swift */; };
+		4B5B33371D73F0E8006F4768 /* Radon-iOS.h in Headers */ = {isa = PBXBuildFile; fileRef = 4B5B33351D73F0E8006F4768 /* Radon-iOS.h */; };
 		4BB1E49C1BE61945000691F7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB1E49B1BE61945000691F7 /* AppDelegate.swift */; };
 		4BB1E49E1BE61945000691F7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB1E49D1BE61945000691F7 /* ViewController.swift */; };
 		4BB1E4A11BE61945000691F7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4BB1E49F1BE61945000691F7 /* Main.storyboard */; };
@@ -24,9 +25,8 @@
 		4BFA0A8C1CF378100079A96F /* TestClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A881CF378100079A96F /* TestClass.swift */; };
 		4BFA0A8D1CF378270079A96F /* TestClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A881CF378100079A96F /* TestClass.swift */; };
 		4BFA0A8E1CF3782B0079A96F /* ExampleRadonStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A871CF378100079A96F /* ExampleRadonStore.swift */; };
-		4BFA0A971CF378520079A96F /* Radion-iOS.h in Headers */ = {isa = PBXBuildFile; fileRef = 4BFA0A961CF378520079A96F /* Radion-iOS.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		4BFA0A9B1CF378520079A96F /* Radion_iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BFA0A941CF378520079A96F /* Radion_iOS.framework */; };
-		4BFA0A9C1CF378520079A96F /* Radion_iOS.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4BFA0A941CF378520079A96F /* Radion_iOS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4BFA0A9B1CF378520079A96F /* Radon_iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BFA0A941CF378520079A96F /* Radon_iOS.framework */; };
+		4BFA0A9C1CF378520079A96F /* Radon_iOS.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4BFA0A941CF378520079A96F /* Radon_iOS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4BFA0AA11CF378590079A96F /* CloudKitInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A811CF377A30079A96F /* CloudKitInterface.swift */; };
 		4BFA0AA21CF3785C0079A96F /* Radon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A821CF377A30079A96F /* Radon.swift */; };
 /* End PBXBuildFile section */
@@ -55,7 +55,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				4BFA0A9C1CF378520079A96F /* Radion_iOS.framework in Embed Frameworks */,
+				4BFA0A9C1CF378520079A96F /* Radon_iOS.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -67,6 +67,8 @@
 		4B25B4BE1CDD1CAF00897DCF /* RadonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadonTests.swift; sourceTree = "<group>"; };
 		4B25B4C01CDD1CAF00897DCF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4B25B4C61CDD1CC900897DCF /* MockCloudKitInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MockCloudKitInterface.swift; sourceTree = "<group>"; };
+		4B5B33341D73F0E8006F4768 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = "Radon-iOS/Info.plist"; sourceTree = SOURCE_ROOT; };
+		4B5B33351D73F0E8006F4768 /* Radon-iOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Radon-iOS.h"; path = "Radon-iOS/Radon-iOS.h"; sourceTree = SOURCE_ROOT; };
 		4BB1E4981BE61945000691F7 /* Radon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Radon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BB1E49B1BE61945000691F7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4BB1E49D1BE61945000691F7 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -81,9 +83,7 @@
 		4BFA0A821CF377A30079A96F /* Radon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Radon.swift; path = Source/Radon.swift; sourceTree = "<group>"; };
 		4BFA0A871CF378100079A96F /* ExampleRadonStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExampleRadonStore.swift; sourceTree = "<group>"; };
 		4BFA0A881CF378100079A96F /* TestClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestClass.swift; sourceTree = "<group>"; };
-		4BFA0A941CF378520079A96F /* Radion_iOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Radion_iOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		4BFA0A961CF378520079A96F /* Radion-iOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Radion-iOS.h"; sourceTree = "<group>"; };
-		4BFA0A981CF378520079A96F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4BFA0A941CF378520079A96F /* Radon_iOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Radon_iOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C45DD345AEB4F0DB18D12D6 /* Pods.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -100,7 +100,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4BB1E4BD1BE619D5000691F7 /* CloudKit.framework in Frameworks */,
-				4BFA0A9B1CF378520079A96F /* Radion_iOS.framework in Frameworks */,
+				4BFA0A9B1CF378520079A96F /* Radon_iOS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -134,7 +134,7 @@
 				4BFA0A801CF377830079A96F /* Source */,
 				4BB1E49A1BE61945000691F7 /* Radon */,
 				4B25B4BD1CDD1CAF00897DCF /* RadonTests */,
-				4BFA0A951CF378520079A96F /* Radion-iOS */,
+				4BFA0A951CF378520079A96F /* Radon-iOS */,
 				4BB1E4991BE61945000691F7 /* Products */,
 				BCB336338B4FF46DFDEA8F3A /* Frameworks */,
 			);
@@ -145,7 +145,7 @@
 			children = (
 				4BB1E4981BE61945000691F7 /* Radon.app */,
 				4B25B4BC1CDD1CAF00897DCF /* RadonTests.xctest */,
-				4BFA0A941CF378520079A96F /* Radion_iOS.framework */,
+				4BFA0A941CF378520079A96F /* Radon_iOS.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -173,12 +173,13 @@
 			name = Source;
 			sourceTree = "<group>";
 		};
-		4BFA0A951CF378520079A96F /* Radion-iOS */ = {
+		4BFA0A951CF378520079A96F /* Radon-iOS */ = {
 			isa = PBXGroup;
 			children = (
-				4BFA0A961CF378520079A96F /* Radion-iOS.h */,
-				4BFA0A981CF378520079A96F /* Info.plist */,
+				4B5B33341D73F0E8006F4768 /* Info.plist */,
+				4B5B33351D73F0E8006F4768 /* Radon-iOS.h */,
 			);
+			name = "Radon-iOS";
 			path = "Radion-iOS";
 			sourceTree = "<group>";
 		};
@@ -197,7 +198,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4BFA0A971CF378520079A96F /* Radion-iOS.h in Headers */,
+				4B5B33371D73F0E8006F4768 /* Radon-iOS.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -241,9 +242,9 @@
 			productReference = 4BB1E4981BE61945000691F7 /* Radon.app */;
 			productType = "com.apple.product-type.application";
 		};
-		4BFA0A931CF378520079A96F /* Radion_iOS */ = {
+		4BFA0A931CF378520079A96F /* Radon_iOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4BFA0A9D1CF378520079A96F /* Build configuration list for PBXNativeTarget "Radion_iOS" */;
+			buildConfigurationList = 4BFA0A9D1CF378520079A96F /* Build configuration list for PBXNativeTarget "Radon_iOS" */;
 			buildPhases = (
 				4BFA0A8F1CF378520079A96F /* Sources */,
 				4BFA0A901CF378520079A96F /* Frameworks */,
@@ -254,9 +255,9 @@
 			);
 			dependencies = (
 			);
-			name = Radion_iOS;
+			name = Radon_iOS;
 			productName = "Radion-iOS";
-			productReference = 4BFA0A941CF378520079A96F /* Radion_iOS.framework */;
+			productReference = 4BFA0A941CF378520079A96F /* Radon_iOS.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -303,7 +304,7 @@
 			targets = (
 				4BB1E4971BE61945000691F7 /* Radon */,
 				4B25B4BB1CDD1CAF00897DCF /* RadonTests */,
-				4BFA0A931CF378520079A96F /* Radion_iOS */,
+				4BFA0A931CF378520079A96F /* Radon_iOS */,
 			);
 		};
 /* End PBXProject section */
@@ -382,7 +383,7 @@
 		};
 		4BFA0A9A1CF378520079A96F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4BFA0A931CF378520079A96F /* Radion_iOS */;
+			target = 4BFA0A931CF378520079A96F /* Radon_iOS */;
 			targetProxy = 4BFA0A991CF378520079A96F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -561,7 +562,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = "Radion-iOS/Info.plist";
+				INFOPLIST_FILE = "Radon-iOS/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
@@ -584,7 +585,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = "Radion-iOS/Info.plist";
+				INFOPLIST_FILE = "Radon-iOS/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
@@ -626,13 +627,14 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4BFA0A9D1CF378520079A96F /* Build configuration list for PBXNativeTarget "Radion_iOS" */ = {
+		4BFA0A9D1CF378520079A96F /* Build configuration list for PBXNativeTarget "Radon_iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4BFA0A9E1CF378520079A96F /* Debug */,
 				4BFA0A9F1CF378520079A96F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4BFA0A931CF378520079A96F"
-               BuildableName = "Radion_iOS.framework"
-               BlueprintName = "Radion_iOS"
+               BuildableName = "Radon_iOS.framework"
+               BlueprintName = "Radon_iOS"
                ReferencedContainer = "container:Radon.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -46,8 +46,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4BFA0A931CF378520079A96F"
-            BuildableName = "Radion_iOS.framework"
-            BlueprintName = "Radion_iOS"
+            BuildableName = "Radon_iOS.framework"
+            BlueprintName = "Radon_iOS"
             ReferencedContainer = "container:Radon.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -64,8 +64,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4BFA0A931CF378520079A96F"
-            BuildableName = "Radion_iOS.framework"
-            BlueprintName = "Radion_iOS"
+            BuildableName = "Radon_iOS.framework"
+            BlueprintName = "Radon_iOS"
             ReferencedContainer = "container:Radon.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
