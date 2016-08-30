@@ -236,6 +236,20 @@ class RadonTests: XCTestCase {
         XCTAssert(store.objectWithIdentifier("Mock") == nil)
     }
     
+    func testSyncWithNewObjectToFetch() {
+        let expectation = self.expectationWithDescription("New object from sync")
+        XCTAssert(store.objectWithIdentifier("Mock") == nil)
+        mockInterface.syncRecordChangeHasNewObject = true
+        radon.sync({ (error) in
+            
+        }) { (error) in
+            XCTAssert(self.store.objectWithIdentifier("Mock") != nil)
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(5, handler: nil)
+    }
+    
     
 //    func testServerChangeToken() {
 //        let mockInterface = MockCloudKitInterface()

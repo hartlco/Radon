@@ -24,6 +24,7 @@ class MockCloudKitInterface: CloudKitInterface {
     var failsFetchRecord = false
     var failsModifyRecord = false
     var failsDeleteRecord = false
+    var syncRecordChangeHasNewObject = false
     
     func saveRecordZone(zone: CKRecordZone, completionHandler: (CKRecordZone?, NSError?) -> Void) {
         if failsSaveRecordZone {
@@ -72,6 +73,21 @@ class MockCloudKitInterface: CloudKitInterface {
         } else {
             modifyRecordsCompletionBlock(nil)
         }
+    }
+    
+    func fetchRecordChanges(onQueue queue: dispatch_queue_t, previousServerChangeToken: CKServerChangeToken?, recordChangeBlock: ((CKRecord) -> Void), recordWithIDWasDeletedBlock: ((CKRecordID) -> Void), fetchRecordChangesCompletionBlock: ((CKServerChangeToken?, NSData?, NSError?) -> Void)) {
+        
+        let mockStore = ExampleRadonStore()
+        
+        if syncRecordChangeHasNewObject {
+            let object = TestClass(string: "Mock", int: 1, double: 2)
+            let record = CKRecord(recordType: "Mock", recordID: CKRecordID(recordName: "Mock"))
+            record.updateWithDictionary(mockStore.allPropertiesForObject(object))
+            recordChangeBlock(record)
+        }
+        
+        fetchRecordChangesCompletionBlock(nil, nil, nil)
+        
     }
     
 }
