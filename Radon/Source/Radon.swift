@@ -261,41 +261,34 @@ public class Radon<S: RadonStore, T:Syncable> {
     private func syncWithToken(token: CKServerChangeToken?, errorBlock:ErrorBlock, completion: CompletionBlock) {
         isSyncing = true
         
-        let fetchRecordChangesOperation = CKFetchRecordChangesOperation(recordZoneID: syncableRecordZone.zoneID, previousServerChangeToken: token)
-        fetchRecordChangesOperation.database = self.privateDatabase
-        
-        fetchRecordChangesOperation.rad_setRecordChangedBlock(onQueue: self.queue) { record in
-            self.handleRecordChangeInSync(record)
-        }
-        
-        fetchRecordChangesOperation.rad_setRecordWithIDWasDeletedBlock(onQueue: self.queue) { id in
-            guard let offlineObject = self.store.objectWithIdentifier(id.recordName) else { return }
+        self.interface.fetchRecordChanges(onQueue: self.queue, previousServerChangeToken: token, recordChangeBlock: { [weak self] (record) in
+            self?.handleRecordChangeInSync(record)
+        }, recordWithIDWasDeletedBlock: { [weak self] (id) in
+            guard let offlineObject = self?.store.objectWithIdentifier(id.recordName) else { return }
             let recordName = String(id.recordName)
-            self.store.deleteObject(offlineObject)
-            self.externDeletionBlock?(deletedRecordID: recordName)
-        }
-        
-        fetchRecordChangesOperation.rad_setFetchRecordChangesCompletionBlock(onQueue: self.queue) { token, data, error in
-            self.handleUnsyncedObjectsInSync(completion: { errors in
+            self?.store.deleteObject(offlineObject)
+            self?.externDeletionBlock?(deletedRecordID: recordName)
+        }, fetchRecordChangesCompletionBlock: { [weak self] (token, data, error) in
+            self?.handleUnsyncedObjectsInSync(completion: { errors in
                 //TODO: handle errors array
                 
-                self.syncToken = token
+                self?.syncToken = token
                 if error?.code == CKErrorCode.ChangeTokenExpired.rawValue {
-                    self.syncToken = nil
+                    self?.syncToken = nil
                     //Delay execution for 3 seconds to not trigger execution limition of iCloud
-                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(3.0 * Double(NSEC_PER_SEC))), self.queue) { () -> Void in
-                        self.syncWithToken(nil,errorBlock: errorBlock, completion: completion)
+                    //TODO: refactor this part to remove "!"
+                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(3.0 * Double(NSEC_PER_SEC))), self!.queue) { () -> Void in
+                        self?.syncWithToken(nil,errorBlock: errorBlock, completion: completion)
                     }
                     
                 } else {
-                    self.isSyncing = false
+                    self?.isSyncing = false
                     completion(error: error)
                     return
                 }
             })
-        }
-        
-        fetchRecordChangesOperation.start()
+                
+        })
 
     }
     

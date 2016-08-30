@@ -23,6 +23,8 @@ public protocol CloudKitInterface {
     func modifyRecord(record: CKRecord, onQueue queue: dispatch_queue_t, modifyRecordsCompletionBlock: (([CKRecord]?, [CKRecordID]?, NSError?) -> Void))
     
     func deleteRecordWithID(recordID: CKRecordID, onQueue queue: dispatch_queue_t, modifyRecordsCompletionBlock: ((NSError?) -> Void))
+    
+    func fetchRecordChanges(onQueue queue: dispatch_queue_t, previousServerChangeToken: CKServerChangeToken?, recordChangeBlock: ((CKRecord) -> Void), recordWithIDWasDeletedBlock: ((CKRecordID) -> Void), fetchRecordChangesCompletionBlock: ((CKServerChangeToken?, NSData?, NSError?) -> Void))
 }
 
 public class RadonCloudKit: CloudKitInterface {
@@ -82,6 +84,21 @@ public class RadonCloudKit: CloudKitInterface {
         }
         
         deleteOperation.start()
+    }
+    
+    public func fetchRecordChanges(onQueue queue: dispatch_queue_t, previousServerChangeToken: CKServerChangeToken?, recordChangeBlock: ((CKRecord) -> Void), recordWithIDWasDeletedBlock: ((CKRecordID) -> Void), fetchRecordChangesCompletionBlock: ((CKServerChangeToken?, NSData?, NSError?) -> Void)) {
+        
+        let fetchRecordChangesOperation = CKFetchRecordChangesOperation(recordZoneID: syncableRecordZone.zoneID, previousServerChangeToken: previousServerChangeToken)
+        fetchRecordChangesOperation.database = self.privateDatabase
+        
+        fetchRecordChangesOperation.rad_setRecordChangedBlock(onQueue: queue, recordChangedBlock: recordChangeBlock)
+        
+        fetchRecordChangesOperation.rad_setRecordWithIDWasDeletedBlock(onQueue: queue, recordWithIDWasDeletedBlock: recordWithIDWasDeletedBlock)
+        
+        fetchRecordChangesOperation.rad_setFetchRecordChangesCompletionBlock(onQueue: queue, fetchRecordChangesCompletionBlock: fetchRecordChangesCompletionBlock)
+        
+        fetchRecordChangesOperation.start()
+        
     }
 }
 
