@@ -8,6 +8,7 @@
 
 import Foundation
 import CloudKit
+@testable import Radon_iOS
 
 class MockCloudKitInterface: CloudKitInterface {
     

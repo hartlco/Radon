@@ -7,6 +7,7 @@
 //
 
 import Foundation
+@testable import Radon_iOS
 
 class MockDefaultsStoreable: DefaultsStoreable {
     

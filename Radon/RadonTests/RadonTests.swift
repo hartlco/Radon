@@ -8,6 +8,7 @@
 
 import XCTest
 import CloudKit
+@testable import Radon_iOS
 
 class RadonTests: XCTestCase {
     
@@ -239,6 +240,23 @@ class RadonTests: XCTestCase {
     func testSyncWithNewObjectToFetch() {
         let expectation = self.expectationWithDescription("New object from sync")
         XCTAssert(store.objectWithIdentifier("Mock") == nil)
+        mockInterface.syncRecordChangeHasNewObject = true
+        radon.sync({ (error) in
+            
+        }) { (error) in
+            XCTAssert(self.store.objectWithIdentifier("Mock") != nil)
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(5, handler: nil)
+    }
+    
+    func testSyncWithNewerObjectAlreadyInStore() {
+        let testObject = TestClass(string: "hi", int: 1, double: 1)
+        testObject.internRecordID = "Mock"
+        store.addObject(testObject)
+        let expectation = self.expectationWithDescription("New object from sync")
+        XCTAssert(store.objectWithIdentifier("Mock") != nil)
         mockInterface.syncRecordChangeHasNewObject = true
         radon.sync({ (error) in
             
