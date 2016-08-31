@@ -15,7 +15,7 @@ Run `pod install`to install Radon.
 Just drag and copy the files in the `Source` folder into your project.
 
 ## Usage
-A full usage guide is still `TODO:` and a lot of the APIs are still in flux as a bigger refactoring is happening on the `pre-3.0-refactoring` branch.
+A full usage guide is still `TODO:` and a lot of the APIs are still in flux as a bigger refactoring is currently happening.
 
 To use Radon, a Store-Class needs to implement all functions defined in `RadonStore`. This Store-Class will be the connection between Radon and the database layer of your App.
 Your model objects that need to be synced need to conform to the `Syncable`protocol.
