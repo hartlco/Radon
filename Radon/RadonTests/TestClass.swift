@@ -7,6 +7,7 @@
 //
 
 import Foundation
+@testable import Radon_iOS
 
 class TestClass: Syncable {
     var string: String
@@ -34,21 +35,14 @@ class TestClass: Syncable {
     }
     
     required init?(dictionary: [String : Any]) {
-        if  let string = dictionary["string"] as? String,
-            let int = dictionary["int"] as? Int,
-            let double = dictionary["double"] as? Double {
-                self.string = string
-                self.int = int
-                self.double = double
-                self.internSyncStatus = true
-        } else {
-            self.string = ""
-            self.int = 0
-            self.double = 0
-            self.internModificationDate = NSDate()
-            self.internSyncStatus = false
-            return nil
-        }
+        guard let string = dictionary["string"] as? String,
+        let int = dictionary["int"] as? Int,
+        let double = dictionary["double"] as? Double else { return nil }
+        
+        self.string = string
+        self.int = int
+        self.double = double
+        self.internSyncStatus = true
     }
 
     

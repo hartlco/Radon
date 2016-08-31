@@ -8,6 +8,7 @@
 
 import XCTest
 import CloudKit
+@testable import Radon_iOS
 
 class RadonTests: XCTestCase {
     
@@ -219,6 +220,52 @@ class RadonTests: XCTestCase {
         let recordID = CKRecordID(recordName: "123")
         radon.handleQueryNotificationReason(.RecordDeleted, forRecordID: recordID)
         XCTAssert(store.objectWithIdentifier(testObject.internRecordID) == nil)
+    }
+    
+    func testHandleQueryNotificationReasonRecordCreated() {
+        XCTAssert(store.objectWithIdentifier("Mock") == nil)
+        let recordID = CKRecordID(recordName: "Mock")
+        radon.handleQueryNotificationReason(.RecordCreated, forRecordID: recordID)
+        XCTAssert(store.objectWithIdentifier("Mock") != nil)
+    }
+    
+    func testHandleQueryNotificationReasonRecordCreatedRecordNotFound() {
+        XCTAssert(store.objectWithIdentifier("Mock") == nil)
+        mockInterface.failsFetchRecord = true
+        let recordID = CKRecordID(recordName: "Mock")
+        radon.handleQueryNotificationReason(.RecordCreated, forRecordID: recordID)
+        XCTAssert(store.objectWithIdentifier("Mock") == nil)
+    }
+    
+    func testSyncWithNewObjectToFetch() {
+        let expectation = self.expectationWithDescription("New object from sync")
+        XCTAssert(store.objectWithIdentifier("Mock") == nil)
+        mockInterface.syncRecordChangeHasNewObject = true
+        radon.sync({ (error) in
+            
+        }) { (error) in
+            XCTAssert(self.store.objectWithIdentifier("Mock") != nil)
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(5, handler: nil)
+    }
+    
+    func testSyncWithNewerObjectAlreadyInStore() {
+        let testObject = TestClass(string: "hi", int: 1, double: 1)
+        testObject.internRecordID = "Mock"
+        store.addObject(testObject)
+        let expectation = self.expectationWithDescription("New object from sync")
+        XCTAssert(store.objectWithIdentifier("Mock") != nil)
+        mockInterface.syncRecordChangeHasNewObject = true
+        radon.sync({ (error) in
+            
+        }) { (error) in
+            XCTAssert(self.store.objectWithIdentifier("Mock") != nil)
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(5, handler: nil)
     }
     
     

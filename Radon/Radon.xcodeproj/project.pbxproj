@@ -18,9 +18,7 @@
 		4BB1E4BD1BE619D5000691F7 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB1E4BC1BE619D5000691F7 /* CloudKit.framework */; };
 		4BD2E0BA1CDF0267009F5CF8 /* MockDefaultsStoreable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BD2E0B91CDF0267009F5CF8 /* MockDefaultsStoreable.swift */; };
 		4BFA0A831CF377A30079A96F /* CloudKitInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A811CF377A30079A96F /* CloudKitInterface.swift */; };
-		4BFA0A841CF377A30079A96F /* CloudKitInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A811CF377A30079A96F /* CloudKitInterface.swift */; };
 		4BFA0A851CF377A30079A96F /* Radon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A821CF377A30079A96F /* Radon.swift */; };
-		4BFA0A861CF377A30079A96F /* Radon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A821CF377A30079A96F /* Radon.swift */; };
 		4BFA0A8A1CF378100079A96F /* ExampleRadonStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A871CF378100079A96F /* ExampleRadonStore.swift */; };
 		4BFA0A8C1CF378100079A96F /* TestClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A881CF378100079A96F /* TestClass.swift */; };
 		4BFA0A8D1CF378270079A96F /* TestClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A881CF378100079A96F /* TestClass.swift */; };
@@ -29,6 +27,12 @@
 		4BFA0A9C1CF378520079A96F /* Radon_iOS.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4BFA0A941CF378520079A96F /* Radon_iOS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4BFA0AA11CF378590079A96F /* CloudKitInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A811CF377A30079A96F /* CloudKitInterface.swift */; };
 		4BFA0AA21CF3785C0079A96F /* Radon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A821CF377A30079A96F /* Radon.swift */; };
+		64B6380B1D6F2ACA00868623 /* RadonStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64B6380A1D6F2ACA00868623 /* RadonStore.swift */; };
+		64B6380D1D6F2AFB00868623 /* Syncable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64B6380C1D6F2AFB00868623 /* Syncable.swift */; };
+		64B6380F1D6F2B0400868623 /* Syncable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64B6380C1D6F2AFB00868623 /* Syncable.swift */; };
+		64B638111D6F2B0600868623 /* RadonStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64B6380A1D6F2ACA00868623 /* RadonStore.swift */; };
+		64B638131D6F2E8E00868623 /* CloudKit+Radon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64B638121D6F2E8E00868623 /* CloudKit+Radon.swift */; };
+		64B638151D6F2EE200868623 /* CloudKit+Radon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64B638121D6F2E8E00868623 /* CloudKit+Radon.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,6 +89,9 @@
 		4BFA0A881CF378100079A96F /* TestClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestClass.swift; sourceTree = "<group>"; };
 		4BFA0A941CF378520079A96F /* Radon_iOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Radon_iOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C45DD345AEB4F0DB18D12D6 /* Pods.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		64B6380A1D6F2ACA00868623 /* RadonStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RadonStore.swift; path = Source/RadonStore.swift; sourceTree = "<group>"; };
+		64B6380C1D6F2AFB00868623 /* Syncable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Syncable.swift; path = Source/Syncable.swift; sourceTree = "<group>"; };
+		64B638121D6F2E8E00868623 /* CloudKit+Radon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "CloudKit+Radon.swift"; path = "Source/CloudKit+Radon.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -169,6 +176,9 @@
 			children = (
 				4BFA0A811CF377A30079A96F /* CloudKitInterface.swift */,
 				4BFA0A821CF377A30079A96F /* Radon.swift */,
+				64B6380A1D6F2ACA00868623 /* RadonStore.swift */,
+				64B6380C1D6F2AFB00868623 /* Syncable.swift */,
+				64B638121D6F2E8E00868623 /* CloudKit+Radon.swift */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -285,7 +295,7 @@
 					};
 					4BFA0A931CF378520079A96F = {
 						CreatedOnToolsVersion = 7.3.1;
-						DevelopmentTeam = 9E8SXF3Y36;
+						DevelopmentTeam = HQR77WVMZ2;
 					};
 				};
 			};
@@ -343,8 +353,6 @@
 			files = (
 				4B25B4C71CDD1CC900897DCF /* MockCloudKitInterface.swift in Sources */,
 				4BFA0A8C1CF378100079A96F /* TestClass.swift in Sources */,
-				4BFA0A861CF377A30079A96F /* Radon.swift in Sources */,
-				4BFA0A841CF377A30079A96F /* CloudKitInterface.swift in Sources */,
 				4BD2E0BA1CDF0267009F5CF8 /* MockDefaultsStoreable.swift in Sources */,
 				4B25B4BF1CDD1CAF00897DCF /* RadonTests.swift in Sources */,
 				4BFA0A8A1CF378100079A96F /* ExampleRadonStore.swift in Sources */,
@@ -357,10 +365,13 @@
 			files = (
 				4BB1E49E1BE61945000691F7 /* ViewController.swift in Sources */,
 				4BFA0A851CF377A30079A96F /* Radon.swift in Sources */,
+				64B6380D1D6F2AFB00868623 /* Syncable.swift in Sources */,
 				4BB1E49C1BE61945000691F7 /* AppDelegate.swift in Sources */,
 				4BFA0A8E1CF3782B0079A96F /* ExampleRadonStore.swift in Sources */,
+				64B6380B1D6F2ACA00868623 /* RadonStore.swift in Sources */,
 				4BFA0A831CF377A30079A96F /* CloudKitInterface.swift in Sources */,
 				4BFA0A8D1CF378270079A96F /* TestClass.swift in Sources */,
+				64B638131D6F2E8E00868623 /* CloudKit+Radon.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -368,8 +379,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				64B638111D6F2B0600868623 /* RadonStore.swift in Sources */,
+				64B638151D6F2EE200868623 /* CloudKit+Radon.swift in Sources */,
 				4BFA0AA21CF3785C0079A96F /* Radon.swift in Sources */,
 				4BFA0AA11CF378590079A96F /* CloudKitInterface.swift in Sources */,
+				64B6380F1D6F2B0400868623 /* Syncable.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -528,6 +542,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				INFOPLIST_FILE = Radon/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = me.mhaddl.Radon;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -544,6 +559,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				INFOPLIST_FILE = Radon/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = me.mhaddl.Radon;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -568,6 +584,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "co.hartl.Radion-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				SKIP_INSTALL = YES;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -591,6 +608,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "co.hartl.Radion-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				SKIP_INSTALL = YES;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
