@@ -207,7 +207,7 @@ public class Radon<S: RadonStore, T:Syncable> {
     
     // MARK: - Internal methods for Unit tests
     
-    internal func handleRecordChangeInSync(record: CKRecord) {
+    internal func handleRecordChangeInSync(record: Record) {
         if let offlineObject = self.store.objectWithIdentifier(record.recordID.recordName) {
             //TODO: Add optional conflict block to handle this situation
             if self.store.modificationDateForObject(offlineObject).isEarlierThan(record.modificationDate)  {
@@ -343,7 +343,7 @@ public class Radon<S: RadonStore, T:Syncable> {
         }
     }
     
-    private func insertObject(fromRecord record:CKRecord) {
+    private func insertObject(fromRecord record:Record) {
         let dictionary = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType:T.self)
         let newObject = self.store.newObjectFromDictionary(dictionary)
         self.store.setModificationDate(record.modificationDate, forObject: newObject)

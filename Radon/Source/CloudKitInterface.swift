@@ -9,6 +9,16 @@
 import Foundation
 import CloudKit
 
+public protocol Record {
+    var recordID: CKRecordID {get}
+    var modificationDate: NSDate? { get }
+    func valuesDictionaryForKeys(keys: [String], syncableType: Syncable.Type) -> [String:Any]
+}
+
+extension CKRecord: Record {
+    
+}
+
 public protocol CloudKitInterface {
     
     var container: CKContainer {get}
@@ -24,7 +34,7 @@ public protocol CloudKitInterface {
     
     func deleteRecordWithID(recordID: CKRecordID, onQueue queue: dispatch_queue_t, modifyRecordsCompletionBlock: ((NSError?) -> Void))
     
-    func fetchRecordChanges(onQueue queue: dispatch_queue_t, previousServerChangeToken: CKServerChangeToken?, recordChangeBlock: ((CKRecord) -> Void), recordWithIDWasDeletedBlock: ((CKRecordID) -> Void), fetchRecordChangesCompletionBlock: ((CKServerChangeToken?, NSData?, NSError?) -> Void))
+    func fetchRecordChanges(onQueue queue: dispatch_queue_t, previousServerChangeToken: CKServerChangeToken?, recordChangeBlock: ((Record) -> Void), recordWithIDWasDeletedBlock: ((CKRecordID) -> Void), fetchRecordChangesCompletionBlock: ((CKServerChangeToken?, NSData?, NSError?) -> Void))
 }
 
 public class RadonCloudKit: CloudKitInterface {
@@ -86,7 +96,7 @@ public class RadonCloudKit: CloudKitInterface {
         deleteOperation.start()
     }
     
-    public func fetchRecordChanges(onQueue queue: dispatch_queue_t, previousServerChangeToken: CKServerChangeToken?, recordChangeBlock: ((CKRecord) -> Void), recordWithIDWasDeletedBlock: ((CKRecordID) -> Void), fetchRecordChangesCompletionBlock: ((CKServerChangeToken?, NSData?, NSError?) -> Void)) {
+    public func fetchRecordChanges(onQueue queue: dispatch_queue_t, previousServerChangeToken: CKServerChangeToken?, recordChangeBlock: ((Record) -> Void), recordWithIDWasDeletedBlock: ((CKRecordID) -> Void), fetchRecordChangesCompletionBlock: ((CKServerChangeToken?, NSData?, NSError?) -> Void)) {
         
         let fetchRecordChangesOperation = CKFetchRecordChangesOperation(recordZoneID: syncableRecordZone.zoneID, previousServerChangeToken: previousServerChangeToken)
         fetchRecordChangesOperation.database = self.privateDatabase

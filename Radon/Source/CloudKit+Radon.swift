@@ -9,7 +9,7 @@
 import Foundation
 import CloudKit
 
-internal extension CKRecord {
+extension CKRecord {
     
     internal convenience init(dictionary: [String:Any], recordType: String, zoneName: String) {
         self.init(recordType: recordType, zoneID: CKRecordZone(zoneName: zoneName).zoneID)
@@ -24,7 +24,7 @@ internal extension CKRecord {
         }
     }
     
-    internal func valuesDictionaryForKeys(keys: [String], syncableType: Syncable.Type) -> [String:Any] {
+    public func valuesDictionaryForKeys(keys: [String], syncableType: Syncable.Type) -> [String:Any] {
         var allValues = [String:Any]()
         allValues["modificationDate"] = self.modificationDate
         for key in keys {
