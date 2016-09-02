@@ -47,9 +47,6 @@ class ExampleRadonStore: RadonStore {
     
     func updateObject(objectUpdateBlock: () -> (T)) -> (() -> (T)) {
         return {
-            //Save the object
-            let new = objectUpdateBlock()
-            
             return objectUpdateBlock()
         }
     }

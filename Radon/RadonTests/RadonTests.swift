@@ -255,6 +255,7 @@ class RadonTests: XCTestCase {
         let testObject = TestClass(string: "hi", int: 1, double: 1)
         testObject.internRecordID = "Mock"
         store.addObject(testObject)
+        mockInterface.syncOlderObject = true
         let expectation = self.expectationWithDescription("New object from sync")
         XCTAssert(store.objectWithIdentifier("Mock") != nil)
         mockInterface.syncRecordChangeHasNewObject = true
@@ -262,6 +263,25 @@ class RadonTests: XCTestCase {
             
         }) { (error) in
             XCTAssert(self.store.objectWithIdentifier("Mock") != nil)
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(5, handler: nil)
+    }
+    
+    func testSyncWithOlderObjectAlreadyInStore() {
+        let testObject = TestClass(string: "hi", int: 1, double: 1)
+        testObject.internRecordID = "Mock"
+        store.addObject(testObject)
+        mockInterface.syncOlderObject = false
+        let expectation = self.expectationWithDescription("New object from sync")
+        XCTAssert(store.objectWithIdentifier("Mock") != nil)
+        mockInterface.syncRecordChangeHasNewObject = true
+        radon.sync({ (error) in
+            
+        }) { (error) in
+            let object = self.store.objectWithIdentifier("Mock")
+            XCTAssert(object?.string == "ServerUpdated");
             expectation.fulfill()
         }
         

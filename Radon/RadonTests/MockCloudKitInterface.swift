@@ -10,6 +10,31 @@ import Foundation
 import CloudKit
 @testable import Radon_iOS
 
+class MockRecord: Record {
+    var recordID: CKRecordID
+    var modificationDate: NSDate?
+    
+    var string:String
+    var int: Int
+    var double: Double
+    
+    func valuesDictionaryForKeys(keys: [String], syncableType: Syncable.Type) -> [String : Any] {
+        return [
+            "string":string,
+            "int":int,
+            "double":double
+        ]
+    }
+    
+    init(recordID: CKRecordID, modificationDate: NSDate, string: String, int: Int, double: Double) {
+        self.recordID = recordID
+        self.modificationDate = modificationDate
+        self.string = string
+        self.int = int
+        self.double = double
+    }
+}
+
 class MockCloudKitInterface: CloudKitInterface {
     
     init() {
@@ -26,6 +51,7 @@ class MockCloudKitInterface: CloudKitInterface {
     var failsModifyRecord = false
     var failsDeleteRecord = false
     var syncRecordChangeHasNewObject = false
+    var syncOlderObject = false
     
     func saveRecordZone(zone: CKRecordZone, completionHandler: (CKRecordZone?, NSError?) -> Void) {
         if failsSaveRecordZone {
@@ -76,14 +102,18 @@ class MockCloudKitInterface: CloudKitInterface {
         }
     }
     
-    func fetchRecordChanges(onQueue queue: dispatch_queue_t, previousServerChangeToken: CKServerChangeToken?, recordChangeBlock: ((CKRecord) -> Void), recordWithIDWasDeletedBlock: ((CKRecordID) -> Void), fetchRecordChangesCompletionBlock: ((CKServerChangeToken?, NSData?, NSError?) -> Void)) {
-        
-        let mockStore = ExampleRadonStore()
+    func fetchRecordChanges(onQueue queue: dispatch_queue_t, previousServerChangeToken: CKServerChangeToken?, recordChangeBlock: ((Record) -> Void), recordWithIDWasDeletedBlock: ((CKRecordID) -> Void), fetchRecordChangesCompletionBlock: ((CKServerChangeToken?, NSData?, NSError?) -> Void)) {
         
         if syncRecordChangeHasNewObject {
-            let object = TestClass(string: "Mock", int: 1, double: 2)
-            let record = CKRecord(recordType: "Mock", recordID: CKRecordID(recordName: "Mock"))
-            record.updateWithDictionary(mockStore.allPropertiesForObject(object))
+            
+            let date: NSDate
+            if syncOlderObject {
+                date = NSDate(timeIntervalSince1970: 0)
+            } else {
+                date = NSDate()
+            }
+            
+            let record = MockRecord(recordID: CKRecordID(recordName: "Mock"), modificationDate: date, string: "ServerUpdated", int: 4, double: 5)
             recordChangeBlock(record)
         }
         
