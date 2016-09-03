@@ -17,7 +17,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         
-        let notificationSettings = UIUserNotificationSettings(forTypes: .None, categories: nil)
+        
+        let notificationSettings = UIUserNotificationSettings(types: [], categories: nil)
         application.registerUserNotificationSettings(notificationSettings)
         application.registerForRemoteNotifications()
         
@@ -31,7 +32,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         
         let cloudKitNotification = CKNotification(fromRemoteNotificationDictionary: userInfo)
-        if cloudKitNotification.notificationType == .Query {
+        if cloudKitNotification.notificationType == .query {
             if let queryNotification = cloudKitNotification as? CKQueryNotification {
                 TestClassRadon.radon.handleQueryNotification(queryNotification)
             }

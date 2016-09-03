@@ -16,7 +16,7 @@ extension CKRecord {
         self.updateWithDictionary(dictionary)
     }
     
-    internal func updateWithDictionary(dictionary: [String:Any]) {
+    internal func updateWithDictionary(_ dictionary: [String:Any]) {
         for (key, value) in dictionary {
             if let value = value as? CKRecordValue {
                 self.setObject(value, forKey: key)
@@ -24,11 +24,11 @@ extension CKRecord {
         }
     }
     
-    public func valuesDictionaryForKeys(keys: [String], syncableType: Syncable.Type) -> [String:Any] {
+    public func valuesDictionaryForKeys(_ keys: [String], syncableType: Syncable.Type) -> [String:Any] {
         var allValues = [String:Any]()
         allValues["modificationDate"] = self.modificationDate
         for key in keys {
-            if let valuesFromRecord = self.valueForKey(key) {
+            if let valuesFromRecord = self.value(forKey: key) {
                 allValues[key] = valuesFromRecord
             } else {
                 assert(true, "Requested key: \(key) has no value in CKRecord instance")

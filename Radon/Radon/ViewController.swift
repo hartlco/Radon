@@ -33,23 +33,23 @@ class ViewController: UITableViewController {
         
         self.updateBlock = { (syncable: Syncable?, recordID: String?) -> () in
             guard let testObject = syncable as? TestClass,
-            let indexForItem = self.store.allObjects().indexOf(testObject) else {
+            let indexForItem = self.store.allObjects().index(of: testObject) else {
                 return
             }
             
-            let indexPath = NSIndexPath(forRow: indexForItem, inSection: 0)
-            self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+            let indexPath = IndexPath(row: indexForItem, section: 0)
+            self.tableView.reloadRows(at: [indexPath], with: .automatic)
             
         }
         
         self.deleteBlock = { (syncable: Syncable?, recordID: String?) -> () in
             guard let testObject = syncable as? TestClass,
-                let indexForItem = self.store.allObjects().indexOf(testObject) else {
+                let indexForItem = self.store.allObjects().index(of: testObject) else {
                     return
             }
             
-            let indexPath = NSIndexPath(forRow: indexForItem, inSection: 0)
-            self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+            let indexPath = IndexPath(row: indexForItem, section: 0)
+            self.tableView.deleteRows(at: [indexPath], with: .automatic)
         }
         
         self.store = TestClassRadon.store
@@ -63,7 +63,7 @@ class ViewController: UITableViewController {
     }
 
 
-    @IBAction func syncButtonPressed(sender: AnyObject) {
+    @IBAction func syncButtonPressed(_ sender: AnyObject) {
         radon.sync({ (error) in
             
         }) { [weak self] (error) in
@@ -71,7 +71,7 @@ class ViewController: UITableViewController {
         }
     }
 
-    @IBAction func addNoteButtonPressed(sender: AnyObject) {
+    @IBAction func addNoteButtonPressed(_ sender: AnyObject) {
         radon.createObject({ (newObject) -> (TestClass) in
             return newObject
         }) { (error) -> () in
@@ -83,30 +83,30 @@ class ViewController: UITableViewController {
     
     // MARK: - TableViewDelegate - DataSource
     
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.store.allObjects().count
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let note = self.store.allObjects()[indexPath.row]
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let note = self.store.allObjects()[(indexPath as NSIndexPath).row]
 
-        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         cell.textLabel?.text = note.string
         cell.detailTextLabel?.text = "\(note.int)"
         return cell
     }
     
-    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return true
     }
     
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         
-        let note = self.store.allObjects()[indexPath.row]
+        let note = self.store.allObjects()[(indexPath as NSIndexPath).row]
         self.radon.deleteObject(note, completion: { (error) -> () in
             if error == nil {
                 self.tableView.reloadData()
@@ -115,11 +115,11 @@ class ViewController: UITableViewController {
         
     }
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        let object = self.store.allObjects()[indexPath.row]
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let object = self.store.allObjects()[(indexPath as NSIndexPath).row]
         
         self.radon.updateObject({
-            object.string = String(random())
+            object.string = String(Int(arc4random()))
             object.int = object.int + 1
             return object
         }) { (error) -> () in
@@ -127,7 +127,7 @@ class ViewController: UITableViewController {
         }
         
         
-        self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+        self.tableView.reloadRows(at: [indexPath], with: .automatic)
     }
 
 }

@@ -11,8 +11,8 @@ import CloudKit
 
 public protocol Record {
     var recordID: CKRecordID {get}
-    var modificationDate: NSDate? { get }
-    func valuesDictionaryForKeys(keys: [String], syncableType: Syncable.Type) -> [String:Any]
+    var modificationDate: Date? { get }
+    func valuesDictionaryForKeys(_ keys: [String], syncableType: Syncable.Type) -> [String:Any]
 }
 
 extension CKRecord: Record {
@@ -24,24 +24,24 @@ public protocol CloudKitInterface {
     var container: CKContainer {get}
     var privateDatabase: CKDatabase {get}
     
-    func saveRecordZone(zone: CKRecordZone, completionHandler: (CKRecordZone?, NSError?) -> Void)
+    func saveRecordZone(_ zone: CKRecordZone, completionHandler: (CKRecordZone?, Error?) -> Void)
     
-    func createRecord(record: CKRecord, onQueue queue: dispatch_queue_t, createRecordCompletionBlock: ((recordName:String?,error:NSError?) -> Void))
+    func createRecord(_ record: CKRecord, onQueue queue: DispatchQueue, createRecordCompletionBlock: ((_ recordName:String?,_ error:Error?) -> Void))
     
-    func fetchRecord(recordID: CKRecordID, onQueue queue: dispatch_queue_t, fetchRecordsCompletionBlock: ((CKRecord?, NSError?) -> Void))
+    func fetchRecord(_ recordID: CKRecordID, onQueue queue: DispatchQueue, fetchRecordsCompletionBlock: ((CKRecord?, Error?) -> Void))
     
-    func modifyRecord(record: CKRecord, onQueue queue: dispatch_queue_t, modifyRecordsCompletionBlock: (([CKRecord]?, [CKRecordID]?, NSError?) -> Void))
+    func modifyRecord(_ record: CKRecord, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: (([CKRecord]?, [CKRecordID]?, Error?) -> Void))
     
-    func deleteRecordWithID(recordID: CKRecordID, onQueue queue: dispatch_queue_t, modifyRecordsCompletionBlock: ((NSError?) -> Void))
+    func deleteRecordWithID(_ recordID: CKRecordID, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: ((Error?) -> Void))
     
-    func fetchRecordChanges(onQueue queue: dispatch_queue_t, previousServerChangeToken: CKServerChangeToken?, recordChangeBlock: ((Record) -> Void), recordWithIDWasDeletedBlock: ((CKRecordID) -> Void), fetchRecordChangesCompletionBlock: ((CKServerChangeToken?, NSData?, NSError?) -> Void))
+    func fetchRecordChanges(onQueue queue: DispatchQueue, previousServerChangeToken: CKServerChangeToken?, recordChangeBlock: ((Record) -> Void), recordWithIDWasDeletedBlock: ((CKRecordID, String) -> Void), fetchRecordChangesCompletionBlock: ((CKRecordZoneID, CKServerChangeToken?, Data?, Bool, Error?) -> Void))
 }
 
-public class RadonCloudKit: CloudKitInterface {
+open class RadonCloudKit: CloudKitInterface {
     
-    public let container: CKContainer
-    public let privateDatabase: CKDatabase
-    public let syncableRecordZone: CKRecordZone
+    open let container: CKContainer
+    open let privateDatabase: CKDatabase
+    open let syncableRecordZone: CKRecordZone
     
     init(cloudKitIdentifier: String, recordZoneName: String) {
         self.container = CKContainer(identifier: cloudKitIdentifier)
@@ -49,22 +49,22 @@ public class RadonCloudKit: CloudKitInterface {
         self.syncableRecordZone = CKRecordZone(zoneName: recordZoneName)
     }
     
-    public func saveRecordZone(zone: CKRecordZone, completionHandler: (CKRecordZone?, NSError?) -> Void) {
-        privateDatabase.saveRecordZone(syncableRecordZone) { (zone, error) -> Void in
+    open func saveRecordZone(_ zone: CKRecordZone, completionHandler: (CKRecordZone?, Error?) -> Void) {
+        privateDatabase.save(syncableRecordZone) { (zone, error) -> Void in
             print("CloudKit error: \(error)")
         }
     }
     
-    public func createRecord(record: CKRecord, onQueue queue: dispatch_queue_t, createRecordCompletionBlock modifyRecordsCompletionBlock: ((recordName:String?, error:NSError?) -> Void)) {
+    open func createRecord(_ record: CKRecord, onQueue queue: DispatchQueue, createRecordCompletionBlock modifyRecordsCompletionBlock: ((_ recordName:String?, _ error:Error?) -> Void)) {
         let createOperation = CKModifyRecordsOperation(recordsToSave: [record], recordIDsToDelete: nil)
         createOperation.database = self.privateDatabase
         createOperation.rad_setModifyRecordsCompletionBlock(onQueue: queue, modifyRecordsCompletionBlock: { (records, recordIDs, error) in
-            modifyRecordsCompletionBlock(recordName:records?.first?.recordID.recordName,error: error)
+            modifyRecordsCompletionBlock(records?.first?.recordID.recordName,error)
         })
         createOperation.start()
     }
     
-    public func fetchRecord(recordID: CKRecordID, onQueue queue: dispatch_queue_t, fetchRecordsCompletionBlock: ((CKRecord?, NSError?) -> Void)) {
+    open func fetchRecord(_ recordID: CKRecordID, onQueue queue: DispatchQueue, fetchRecordsCompletionBlock: ((CKRecord?, Error?) -> Void)) {
         let fetchOperation = CKFetchRecordsOperation(recordIDs: [recordID])
         fetchOperation.database = self.privateDatabase
         fetchOperation.rad_setFetchRecordsCompletionBlock(inQueue: queue, fetchRecordsCompletionBlock: { (recordsDictionary, error) in
@@ -78,15 +78,15 @@ public class RadonCloudKit: CloudKitInterface {
         fetchOperation.start()
     }
     
-    public func modifyRecord(record: CKRecord, onQueue queue: dispatch_queue_t, modifyRecordsCompletionBlock: (([CKRecord]?, [CKRecordID]?, NSError?) -> Void)) {
+    open func modifyRecord(_ record: CKRecord, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: (([CKRecord]?, [CKRecordID]?, Error?) -> Void)) {
         let modifyOperation = CKModifyRecordsOperation(recordsToSave: [record], recordIDsToDelete: nil)
         modifyOperation.database = self.privateDatabase
-        modifyOperation.savePolicy = .ChangedKeys
+        modifyOperation.savePolicy = .changedKeys
         modifyOperation.rad_setModifyRecordsCompletionBlock(onQueue: queue, modifyRecordsCompletionBlock: modifyRecordsCompletionBlock)
         modifyOperation.start()
     }
     
-    public func deleteRecordWithID(recordID: CKRecordID, onQueue queue: dispatch_queue_t, modifyRecordsCompletionBlock: ((NSError?) -> Void)) {
+    open func deleteRecordWithID(_ recordID: CKRecordID, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: ((Error?) -> Void)) {
         let deleteOperation = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: [recordID])
         deleteOperation.database = self.privateDatabase
         deleteOperation.rad_setModifyRecordsCompletionBlock(onQueue: queue) {records, deletedRecordIDs, error in
@@ -96,45 +96,50 @@ public class RadonCloudKit: CloudKitInterface {
         deleteOperation.start()
     }
     
-    public func fetchRecordChanges(onQueue queue: dispatch_queue_t, previousServerChangeToken: CKServerChangeToken?, recordChangeBlock: ((Record) -> Void), recordWithIDWasDeletedBlock: ((CKRecordID) -> Void), fetchRecordChangesCompletionBlock: ((CKServerChangeToken?, NSData?, NSError?) -> Void)) {
+    open func fetchRecordChanges(onQueue queue: DispatchQueue, previousServerChangeToken: CKServerChangeToken?, recordChangeBlock: ((Record) -> Void), recordWithIDWasDeletedBlock: ((CKRecordID, String) -> Void), fetchRecordChangesCompletionBlock: ((CKRecordZoneID, CKServerChangeToken?, Data?, Bool, Error?) -> Void)) {
         
-        let fetchRecordChangesOperation = CKFetchRecordChangesOperation(recordZoneID: syncableRecordZone.zoneID, previousServerChangeToken: previousServerChangeToken)
-        fetchRecordChangesOperation.database = self.privateDatabase
+        let options = CKFetchRecordZoneChangesOptions()
+        options.previousServerChangeToken = previousServerChangeToken
         
-        fetchRecordChangesOperation.rad_setRecordChangedBlock(onQueue: queue, recordChangedBlock: recordChangeBlock)
+        let fetchRecordZoneChangesOperation = CKFetchRecordZoneChangesOperation(recordZoneIDs: [self.syncableRecordZone.zoneID], optionsByRecordZoneID: [self.syncableRecordZone.zoneID:options])
         
-        fetchRecordChangesOperation.rad_setRecordWithIDWasDeletedBlock(onQueue: queue, recordWithIDWasDeletedBlock: recordWithIDWasDeletedBlock)
+        fetchRecordZoneChangesOperation.database = self.privateDatabase
         
-        fetchRecordChangesOperation.rad_setFetchRecordChangesCompletionBlock(onQueue: queue, fetchRecordChangesCompletionBlock: fetchRecordChangesCompletionBlock)
+        fetchRecordZoneChangesOperation.rad_setRecordChangedBlock(onQueue: queue, recordChangedBlock: recordChangeBlock)
         
-        fetchRecordChangesOperation.start()
+        fetchRecordZoneChangesOperation.rad_setRecordWithIDWasDeletedBlock(onQueue: queue, recordWithIDWasDeletedBlock: recordWithIDWasDeletedBlock)
+        
+        fetchRecordZoneChangesOperation.rad_setFetchRecordChangesCompletionBlock(onQueue: queue, fetchRecordChangesCompletionBlock: fetchRecordChangesCompletionBlock)
+        
+        fetchRecordZoneChangesOperation.start()
         
     }
 }
 
 // MARK: - Private CKDatabaseOperation extensions
 
-internal extension CKFetchRecordChangesOperation {
-    func rad_setRecordChangedBlock(onQueue queue: dispatch_queue_t, recordChangedBlock: ((CKRecord) -> Void)) {
+internal extension CKFetchRecordZoneChangesOperation {
+    func rad_setRecordChangedBlock(onQueue queue: DispatchQueue, recordChangedBlock: ((CKRecord) -> Void)) {
         self.recordChangedBlock = { record in
-            return dispatch_sync(queue) {
+            return queue.sync {
                 recordChangedBlock(record)
             }
         }
     }
     
-    func rad_setRecordWithIDWasDeletedBlock(onQueue queue: dispatch_queue_t, recordWithIDWasDeletedBlock: ((CKRecordID) -> Void)) {
-        self.recordWithIDWasDeletedBlock = { record in
-            return dispatch_sync(queue) {
-                recordWithIDWasDeletedBlock(record)
+    func rad_setRecordWithIDWasDeletedBlock(onQueue queue: DispatchQueue, recordWithIDWasDeletedBlock: ((CKRecordID, String) -> Void)) {
+        self.recordWithIDWasDeletedBlock = { record, string in
+            return queue.sync {
+                recordWithIDWasDeletedBlock(record, string)
             }
         }
     }
     
-    func rad_setFetchRecordChangesCompletionBlock(onQueue queue: dispatch_queue_t, fetchRecordChangesCompletionBlock: ((CKServerChangeToken?, NSData?, NSError?) -> Void)) {
-        self.fetchRecordChangesCompletionBlock = { token, data, error in
-            return dispatch_sync(queue) {
-                fetchRecordChangesCompletionBlock(token, data, error)
+    func rad_setFetchRecordChangesCompletionBlock(onQueue queue: DispatchQueue, fetchRecordChangesCompletionBlock: ((CKRecordZoneID, CKServerChangeToken?, Data?, Bool, Error?) -> Void)) {
+        
+        self.recordZoneFetchCompletionBlock = { zoneID, token, data, moreComing, error in
+            return queue.sync {
+                fetchRecordChangesCompletionBlock(zoneID,token, data, moreComing, error)
             }
         }
         
@@ -142,25 +147,25 @@ internal extension CKFetchRecordChangesOperation {
 }
 
 internal extension CKModifyRecordsOperation {
-    func rad_setPerRecordProgressBlock(onQueue queue: dispatch_queue_t, perRecordProgressBlock: ((CKRecord, Double) -> Void)) {
+    func rad_setPerRecordProgressBlock(onQueue queue: DispatchQueue, perRecordProgressBlock: ((CKRecord, Double) -> Void)) {
         self.perRecordProgressBlock = { record, double in
-            return dispatch_async(queue) {
+            return queue.async {
                 perRecordProgressBlock(record, double)
             }
         }
     }
     
-    func rad_setPerRecordCompletionBlock(onQueue queue: dispatch_queue_t, perRecordCompletionBlock: ((CKRecord?, NSError?) -> Void)) {
-        self.perRecordCompletionBlock = { record, error in
-            return dispatch_async(queue) {
+    func rad_setPerRecordCompletionBlock(onQueue queue: DispatchQueue, perRecordCompletionBlock: ((CKRecord?, Error?) -> Void)) {
+        self.perRecordCompletionBlock = { (record, error) -> () in
+            return queue.async {
                 perRecordCompletionBlock(record, error)
             }
         }
     }
     
-    func rad_setModifyRecordsCompletionBlock(onQueue queue: dispatch_queue_t, modifyRecordsCompletionBlock: (([CKRecord]?, [CKRecordID]?, NSError?) -> Void)) {
+    func rad_setModifyRecordsCompletionBlock(onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: (([CKRecord]?, [CKRecordID]?, Error?) -> Void)) {
         self.modifyRecordsCompletionBlock = { records, recordID, error in
-            return dispatch_async(queue) {
+            return queue.async {
                 modifyRecordsCompletionBlock(records, recordID, error)
             }
         }
@@ -168,9 +173,9 @@ internal extension CKModifyRecordsOperation {
 }
 
 internal extension CKFetchRecordsOperation {
-    func rad_setFetchRecordsCompletionBlock(inQueue queue: dispatch_queue_t, fetchRecordsCompletionBlock: (([CKRecordID : CKRecord]?, NSError?) -> Void)) {
+    func rad_setFetchRecordsCompletionBlock(inQueue queue: DispatchQueue, fetchRecordsCompletionBlock: (([CKRecordID : CKRecord]?, Error?) -> Void)) {
         self.fetchRecordsCompletionBlock = { recordsDictionary, error in
-            return dispatch_async(queue) {
+            return queue.async {
                 fetchRecordsCompletionBlock(recordsDictionary, error)
             }
         }

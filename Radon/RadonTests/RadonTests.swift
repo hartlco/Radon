@@ -23,8 +23,8 @@ class RadonTests: XCTestCase {
     }
     
     func testDateExtensionEalier() {
-        let date1 = NSDate(timeIntervalSince1970: 0)
-        let date2 = NSDate()
+        let date1 = Date(timeIntervalSince1970: 0)
+        let date2 = Date()
         
         XCTAssert(date1.isEarlierThan(date2))
         XCTAssert(!date2.isEarlierThan(date1))
@@ -32,14 +32,14 @@ class RadonTests: XCTestCase {
     }
     
     func testDateExtensionNil() {
-        let date1: NSDate? = nil
-        let date2 = NSDate()
+        let date1: Date? = nil
+        let date2 = Date()
         
         XCTAssert(!date2.isEarlierThan(date1))
     }
     
     func testUserDefaultsExtension() {
-        let userDefaults = NSUserDefaults()
+        let userDefaults = UserDefaults()
         let key = "key"
         let testString = "1234Test"
         userDefaults.saveObject(testString, forKey: key)
@@ -89,7 +89,7 @@ class RadonTests: XCTestCase {
     }
     
     func testUpdateObjectSuccess() {
-        let expectation = self.expectationWithDescription("Update Object")
+        let expectation = self.expectation(description: "Update Object")
         
         mockInterface.failsCreateRecord = true
         let testObject = TestClass(string: "", int: 0, double: 0)
@@ -105,12 +105,12 @@ class RadonTests: XCTestCase {
             expectation.fulfill()
         }
         
-        waitForExpectationsWithTimeout(5, handler: nil)
+        waitForExpectations(timeout: 5, handler: nil)
         
     }
     
     func testUpdateObjectError() {
-        let expectation = self.expectationWithDescription("Update Object")
+        let expectation = self.expectation(description: "Update Object")
         
         mockInterface.failsCreateRecord = true
         let testObject = TestClass(string: "", int: 0, double: 0)
@@ -129,7 +129,7 @@ class RadonTests: XCTestCase {
         store.setRecordName("Mock", forObject: testObject)
         mockInterface.failsModifyRecord = true
         //Fail because modify failed
-        let expectation2 = self.expectationWithDescription("Update Object fail 2")
+        let expectation2 = self.expectation(description: "Update Object fail 2")
         radon.updateObject({ testClass in
             testObject.string = "Update"
             return testObject
@@ -139,9 +139,9 @@ class RadonTests: XCTestCase {
             expectation2.fulfill()
         }
         
-        waitForExpectationsWithTimeout(5, handler: nil)
+        waitForExpectations(timeout: 5, handler: nil)
         
-        let expectation3 = self.expectationWithDescription("Update Object fail 3")
+        let expectation3 = self.expectation(description: "Update Object fail 3")
         mockInterface.failsFetchRecord = true
         //Fail because fetch failed
         radon.updateObject({ testClass in
@@ -153,11 +153,11 @@ class RadonTests: XCTestCase {
             expectation3.fulfill()
         }
         
-        waitForExpectationsWithTimeout(5, handler: nil)
+        waitForExpectations(timeout: 5, handler: nil)
     }
     
     func testUpdateObjectForNotYetSyncedObject() {
-        let expectation = self.expectationWithDescription("Update Object")
+        let expectation = self.expectation(description: "Update Object")
         
         mockInterface.failsCreateRecord = true
         let testObject = TestClass(string: "", int: 0, double: 0)
@@ -173,12 +173,12 @@ class RadonTests: XCTestCase {
             expectation.fulfill()
         }
         
-        waitForExpectationsWithTimeout(5, handler: nil)
+        waitForExpectations(timeout: 5, handler: nil)
     }
     
     
     func testDeleteRecordSuccess() {
-        let expectation = self.expectationWithDescription("Delete Object")
+        let expectation = self.expectation(description: "Delete Object")
         let testObject = TestClass(string: "hi", int: 1, double: 1)
         testObject.internRecordID = "123"
         store.addObject(testObject)
@@ -188,7 +188,7 @@ class RadonTests: XCTestCase {
             XCTAssert(self.store.objectWithIdentifier(testObject.internRecordID) == nil)
             expectation.fulfill()
         }
-        waitForExpectationsWithTimeout(5, handler: nil)
+        waitForExpectations(timeout: 5, handler: nil)
     }
     
     func testHandleQueryNotificationReasonUpdated() {
@@ -197,7 +197,7 @@ class RadonTests: XCTestCase {
         store.addObject(testObject)
         XCTAssert(store.objectWithIdentifier(testObject.internRecordID) != nil)
         let recordID = CKRecordID(recordName: "123")
-        radon.handleQueryNotificationReason(.RecordUpdated, forRecordID: recordID)
+        radon.handleQueryNotificationReason(.recordUpdated, forRecordID: recordID)
         XCTAssert(testObject.string == "Mock")
     }
     
@@ -208,7 +208,7 @@ class RadonTests: XCTestCase {
         XCTAssert(store.objectWithIdentifier(testObject.internRecordID) != nil)
         let recordID = CKRecordID(recordName: "123")
         mockInterface.failsFetchRecord = true
-        radon.handleQueryNotificationReason(.RecordUpdated, forRecordID: recordID)
+        radon.handleQueryNotificationReason(.recordUpdated, forRecordID: recordID)
         XCTAssert(testObject.string == "hi")
     }
     
@@ -218,14 +218,14 @@ class RadonTests: XCTestCase {
         store.addObject(testObject)
         XCTAssert(store.objectWithIdentifier(testObject.internRecordID) != nil)
         let recordID = CKRecordID(recordName: "123")
-        radon.handleQueryNotificationReason(.RecordDeleted, forRecordID: recordID)
+        radon.handleQueryNotificationReason(.recordDeleted, forRecordID: recordID)
         XCTAssert(store.objectWithIdentifier(testObject.internRecordID) == nil)
     }
     
     func testHandleQueryNotificationReasonRecordCreated() {
         XCTAssert(store.objectWithIdentifier("Mock") == nil)
         let recordID = CKRecordID(recordName: "Mock")
-        radon.handleQueryNotificationReason(.RecordCreated, forRecordID: recordID)
+        radon.handleQueryNotificationReason(.recordCreated, forRecordID: recordID)
         XCTAssert(store.objectWithIdentifier("Mock") != nil)
     }
     
@@ -233,12 +233,12 @@ class RadonTests: XCTestCase {
         XCTAssert(store.objectWithIdentifier("Mock") == nil)
         mockInterface.failsFetchRecord = true
         let recordID = CKRecordID(recordName: "Mock")
-        radon.handleQueryNotificationReason(.RecordCreated, forRecordID: recordID)
+        radon.handleQueryNotificationReason(.recordCreated, forRecordID: recordID)
         XCTAssert(store.objectWithIdentifier("Mock") == nil)
     }
     
     func testSyncWithNewObjectToFetch() {
-        let expectation = self.expectationWithDescription("New object from sync")
+        let expectation = self.expectation(description: "New object from sync")
         XCTAssert(store.objectWithIdentifier("Mock") == nil)
         mockInterface.syncRecordChangeHasNewObject = true
         radon.sync({ (error) in
@@ -248,7 +248,7 @@ class RadonTests: XCTestCase {
             expectation.fulfill()
         }
         
-        waitForExpectationsWithTimeout(5, handler: nil)
+        waitForExpectations(timeout: 5, handler: nil)
     }
     
     func testSyncWithNewerObjectAlreadyInStore() {
@@ -256,7 +256,7 @@ class RadonTests: XCTestCase {
         testObject.internRecordID = "Mock"
         store.addObject(testObject)
         mockInterface.syncOlderObject = true
-        let expectation = self.expectationWithDescription("New object from sync")
+        let expectation = self.expectation(description: "New object from sync")
         XCTAssert(store.objectWithIdentifier("Mock") != nil)
         mockInterface.syncRecordChangeHasNewObject = true
         radon.sync({ (error) in
@@ -266,7 +266,7 @@ class RadonTests: XCTestCase {
             expectation.fulfill()
         }
         
-        waitForExpectationsWithTimeout(5, handler: nil)
+        waitForExpectations(timeout: 5, handler: nil)
     }
     
     func testSyncWithOlderObjectAlreadyInStore() {
@@ -274,7 +274,7 @@ class RadonTests: XCTestCase {
         testObject.internRecordID = "Mock"
         store.addObject(testObject)
         mockInterface.syncOlderObject = false
-        let expectation = self.expectationWithDescription("New object from sync")
+        let expectation = self.expectation(description: "New object from sync")
         XCTAssert(store.objectWithIdentifier("Mock") != nil)
         mockInterface.syncRecordChangeHasNewObject = true
         radon.sync({ (error) in
@@ -285,7 +285,7 @@ class RadonTests: XCTestCase {
             expectation.fulfill()
         }
         
-        waitForExpectationsWithTimeout(5, handler: nil)
+        waitForExpectations(timeout: 5, handler: nil)
     }
     
     

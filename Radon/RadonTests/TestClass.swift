@@ -16,13 +16,13 @@ class TestClass: Syncable {
     var internRecordID: String?
     var internSyncStatus: Bool
     
-    var internModificationDate: NSDate = NSDate()
+    var internModificationDate: Date = Date()
     
     required init() {
         self.string = ""
         self.int = 0
         self.double = 0
-        self.internModificationDate = NSDate()
+        self.internModificationDate = Date()
         self.internSyncStatus = false
     }
     
@@ -30,7 +30,7 @@ class TestClass: Syncable {
         self.string = string
         self.int = int
         self.double = double
-        self.internModificationDate = NSDate()
+        self.internModificationDate = Date()
         self.internSyncStatus = false
     }
     
@@ -46,7 +46,7 @@ class TestClass: Syncable {
     }
 
     
-    func setRecordID(recordID: String?) {
+    func setRecordID(_ recordID: String?) {
         self.internRecordID = recordID
     }
     
@@ -66,12 +66,12 @@ class TestClass: Syncable {
         return "internSyncStatus"
     }
     
-    func modificationDate() -> NSDate {
+    func modificationDate() -> Date {
         return self.internModificationDate
     }
     
     
-    func updateWithDictionary(dictionary: [String:Any]) {
+    func updateWithDictionary(_ dictionary: [String:Any]) {
         if  let string = dictionary["string"] as? String,
             let int = dictionary["int"] as? Int,
             let double = dictionary["double"] as? Double {

@@ -11,13 +11,13 @@ import Foundation
 
 class MockDefaultsStoreable: DefaultsStoreable {
     
-    private var store: [String:AnyObject] = [:]
+    fileprivate var store: [String:Any] = [:]
     
-    func loadObjectForKey(key: String) -> AnyObject? {
+    func loadObjectForKey(_ key: String) -> Any? {
         return store[key]
     }
     
-    func saveObject(object: AnyObject?, forKey key: String) {
+    func saveObject(_ object: Any?, forKey key: String) {
         store[key] = object
     }
 }

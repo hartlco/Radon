@@ -12,7 +12,7 @@ import CloudKit
 private let RadonTokenConstant = "RadonToken"
 private let RadoniCloudUserConstant = "RadoniCloudUserConstant"
 
-extension NSDate {
+extension Date {
     /**
      Basic comparison if the date self is smaller than the date given as the argument.
      
@@ -20,60 +20,60 @@ extension NSDate {
      
      - returns: Boolean value indicating if the date self is smaller than the date in the argument. If the argument is nil, `false` is returned.
      */
-    func isEarlierThan(date: NSDate?) -> Bool {
+    func isEarlierThan(_ date: Date?) -> Bool {
         guard let date = date else {
             return false
         }
         
-        return self.compare(date) == .OrderedAscending
+        return self.compare(date) == .orderedAscending
     }
 }
 
 public enum RadoniCloudUserState {
-    case FirstSync
-    case AlreadySynced
-    case Changed
+    case firstSync
+    case alreadySynced
+    case changed
 }
 
 public protocol DefaultsStoreable {
-    func saveObject(object: AnyObject?, forKey key: String)
-    func loadObjectForKey(key: String) -> AnyObject?
+    func saveObject(_ object: Any?, forKey key: String)
+    func loadObjectForKey(_ key: String) -> Any?
 }
 
-extension NSUserDefaults: DefaultsStoreable {
-    public func saveObject(object: AnyObject?, forKey key: String) {
-        self.setObject(object, forKey: key)
+extension UserDefaults: DefaultsStoreable {
+    public func saveObject(_ object: Any?, forKey key: String) {
+        self.set(object, forKey: key)
         self.synchronize()
     }
     
-    public func loadObjectForKey(key: String) -> AnyObject? {
-        return self.objectForKey(key)
+    public func loadObjectForKey(_ key: String) -> Any? {
+        return self.object(forKey: key)
     }
 }
 
-public class Radon<S: RadonStore, T:Syncable> {
+open class Radon<S: RadonStore, T:Syncable> {
     
     /// CompletionBlock: Simple typealias for a completionBlock taking an NSError optional.
-    public typealias CompletionBlock = (error: NSError?) -> ()
-    public typealias ErrorBlock = (error: NSError) -> ()
+    public typealias CompletionBlock = (_ error: Error?) -> ()
+    public typealias ErrorBlock = (_ error: Error) -> ()
     
     /// queue: Defines the `dispatch_queue_t`object on which all `RadonStore` and general completion operations are executed.
-    public var queue: dispatch_queue_t = dispatch_get_main_queue()
+    open var queue: DispatchQueue = DispatchQueue.main
     
-    public var externInsertBlock: ((syncable: S.T) -> ())? = nil
+    open var externInsertBlock: ((_ syncable: S.T) -> ())? = nil
     
-    public var externUpdateBlock: ((syncable: S.T) -> ())? = nil
+    open var externUpdateBlock: ((_ syncable: S.T) -> ())? = nil
     
     //TODO: rename to recordName
-    public var externDeletionBlock: ((deletedRecordID: String?) -> ())? = nil
+    open var externDeletionBlock: ((_ deletedRecordID: String?) -> ())? = nil
     
-    public var defaultsStoreable: DefaultsStoreable = NSUserDefaults.standardUserDefaults()
+    open var defaultsStoreable: DefaultsStoreable = UserDefaults.standard
     
     /// The token from the previous sync operation. It is used to determine the changes from the server since the last sync. If all data from the server should the synced, nil out this property. The token is stored in the standard `NSUserDefaults` with the key `RadonToken`.
-    public var syncToken: CKServerChangeToken? {
+    open var syncToken: CKServerChangeToken? {
         get {
-            guard let tokenData = defaultsStoreable.loadObjectForKey(RadonTokenConstant) as? NSData,
-                let token = NSKeyedUnarchiver.unarchiveObjectWithData(tokenData) as? CKServerChangeToken else  {
+            guard let tokenData = defaultsStoreable.loadObjectForKey(RadonTokenConstant) as? Data,
+                let token = NSKeyedUnarchiver.unarchiveObject(with: tokenData) as? CKServerChangeToken else  {
                     return nil
             }
             return token
@@ -84,30 +84,30 @@ public class Radon<S: RadonStore, T:Syncable> {
                 return
             }
             
-            let data = NSKeyedArchiver.archivedDataWithRootObject(token)
-            defaultsStoreable.saveObject(data, forKey: RadonTokenConstant)
+            let data = NSKeyedArchiver.archivedData(withRootObject: token)
+            defaultsStoreable.saveObject(data as AnyObject?, forKey: RadonTokenConstant)
             
         }
     }
     
-    public private(set) var isSyncing = false
+    open fileprivate(set) var isSyncing = false
     
-    private let privateDatabase: CKDatabase
-    private let store: S
-    private let syncableName = String(T)
-    private let syncableRecordZone = CKRecordZone(zoneName: String(T))
-    private let container: CKContainer
-    private let interface: CloudKitInterface
+    fileprivate let privateDatabase: CKDatabase
+    fileprivate let store: S
+    fileprivate let syncableName = String(describing: T.self)
+    fileprivate let syncableRecordZone = CKRecordZone(zoneName: String(describing: T.self))
+    fileprivate let container: CKContainer
+    fileprivate let interface: CloudKitInterface
     
     //TODO: Initiliazer can fail, handle with throw or optional
-    public init(store: S, interface: CloudKitInterface, recordZoneErrorBlock: ((error: NSError) -> ())?) {
+    public init(store: S, interface: CloudKitInterface, recordZoneErrorBlock: ((_ error: Error) -> ())?) {
         
         self.privateDatabase = interface.privateDatabase
         self.container = interface.container
         self.interface = interface
         
         interface.saveRecordZone(syncableRecordZone) { (zone, error) -> Void in
-            if let error = error { recordZoneErrorBlock?(error: error) }
+            if let error = error { recordZoneErrorBlock?(error) }
         }
         
         self.store = store
@@ -115,7 +115,7 @@ public class Radon<S: RadonStore, T:Syncable> {
     }
     
     public convenience init(store: S, cloudKitIdentifier: String) {
-        self.init(store: store, interface: RadonCloudKit(cloudKitIdentifier: cloudKitIdentifier, recordZoneName: String(T)), recordZoneErrorBlock: nil)
+        self.init(store: store, interface: RadonCloudKit(cloudKitIdentifier: cloudKitIdentifier, recordZoneName: String(describing: T.self)), recordZoneErrorBlock: nil)
     }
     
     
@@ -128,7 +128,7 @@ public class Radon<S: RadonStore, T:Syncable> {
      - parameter error: Error block that may execute if an error during the sync occurs
      - parameter completion: The completionBlock, containing an optional NSError object, that is triggered when the operation finishes
      */
-    public func sync(error: ErrorBlock, completion: CompletionBlock) {
+    open func sync(_ error: ErrorBlock, completion: CompletionBlock) {
         self.syncWithToken(self.syncToken, errorBlock: error, completion: completion)
     }
     
@@ -141,7 +141,7 @@ public class Radon<S: RadonStore, T:Syncable> {
      - parameter completion: Block that is executed after the object was sucessfully created in the CloudKit backend
  
      */
-    public func createObject(newObjectBlock: ((newObject: S.T) -> (S.T)), completion: CompletionBlock) {
+    open func createObject(_ newObjectBlock: ((_ newObject: S.T) -> (S.T)), completion: CompletionBlock) {
         let newObject = self.store.newObject(newObjectBlock)()
         self.createRecord(newObject, completion: completion)
     }
@@ -151,10 +151,10 @@ public class Radon<S: RadonStore, T:Syncable> {
      
  
      */
-    public func updateObject(updateBlock: () -> (S.T), completion: CompletionBlock) {
-        dispatch_async(self.queue) { () -> Void in
+    open func updateObject(_ updateBlock: @escaping () -> (S.T), completion: CompletionBlock) {
+        self.queue.async { () -> Void in
             let updatedObject = self.store.updateObject(updateBlock)()
-            self.store.setModificationDate(NSDate(), forObject: updatedObject)
+            self.store.setModificationDate(Date(), forObject: updatedObject)
             self.store.setSyncStatus(false, forObject: updatedObject)
             self.recordForObject(updatedObject, success: { (record) -> () in
                 let dictionary = self.store.allPropertiesForObject(updatedObject)
@@ -164,16 +164,16 @@ public class Radon<S: RadonStore, T:Syncable> {
                         self.store.setSyncStatus(true, forObject: updatedObject)
                     }
                     
-                    completion(error: error)
+                    completion(error)
                 })
                 
             }) { (error) -> () in
-                completion(error: error)
+                completion(error)
             }
         }
     }
     
-    public func deleteObject(object: S.T, completion: CompletionBlock) {
+    open func deleteObject(_ object: S.T, completion: CompletionBlock) {
         let recordName = self.store.recordNameForObject(object)
         self.store.deleteObject(object)
         if let recordName = recordName {
@@ -181,25 +181,25 @@ public class Radon<S: RadonStore, T:Syncable> {
         }
     }
     
-    public func handleQueryNotification(queryNotification: CKQueryNotification) {
+    open func handleQueryNotification(_ queryNotification: CKQueryNotification) {
         guard let recordID = queryNotification.recordID else { return }
         self.handleQueryNotificationReason(queryNotification.queryNotificationReason, forRecordID: recordID)
     }
     
-    public func checkIfiCloudUserChanged(success: (userStatus: RadoniCloudUserState) -> ()) {
-        self.container.fetchUserRecordIDWithCompletionHandler { (recordID, error) -> Void in
+    open func checkIfiCloudUserChanged(_ success: @escaping (_ userStatus: RadoniCloudUserState) -> ()) {
+        self.container.fetchUserRecordID { (recordID, error) -> Void in
             guard let currentUserID = self.loadUserID() else {
                 self.saveUserID(recordID?.recordName)
-                success(userStatus: .FirstSync)
+                success(.firstSync)
                 return
             }
             
-            if let recordID = recordID?.recordName where recordID == currentUserID {
-                success(userStatus: .AlreadySynced)
+            if let recordID = recordID?.recordName , recordID == currentUserID {
+                success(.alreadySynced)
                 return
             } else {
                 self.saveUserID(recordID?.recordName)
-                success(userStatus: .Changed)
+                success(.changed)
                 return
             }
         }
@@ -207,7 +207,7 @@ public class Radon<S: RadonStore, T:Syncable> {
     
     // MARK: - Internal methods for Unit tests
     
-    internal func handleRecordChangeInSync(record: Record) {
+    internal func handleRecordChangeInSync(_ record: Record) {
         if let offlineObject = self.store.objectWithIdentifier(record.recordID.recordName) {
             //TODO: Add optional conflict block to handle this situation
             if self.store.modificationDateForObject(offlineObject).isEarlierThan(record.modificationDate)  {
@@ -216,7 +216,7 @@ public class Radon<S: RadonStore, T:Syncable> {
                 self.store.setModificationDate(record.modificationDate, forObject: offlineObject)
                 self.store.setSyncStatus(true, forObject: offlineObject)
                 self.store.updateObject(offlineObject, withDictionary: dict)
-                self.externUpdateBlock?(syncable: offlineObject)
+                self.externUpdateBlock?(offlineObject)
             } else  {
                 // Local version of the object is newer than the server version. Mark it as unsynced so it will be synced in the end.
                 self.store.setSyncStatus(false, forObject: offlineObject)
@@ -228,17 +228,17 @@ public class Radon<S: RadonStore, T:Syncable> {
         }
     }
     
-    internal func handleUnsyncedObjectsInSync(completion completion: (errors: [NSError]) -> ()) {
-        let dispatchGroup = dispatch_group_create()
-        var errors = [NSError]()
+    internal func handleUnsyncedObjectsInSync(completion: @escaping (_ errors: [Error]) -> ()) {
+        let dispatchGroup = DispatchGroup()
+        var errors = [Error]()
         
         for object in self.store.allUnsyncedObjects() {
-            dispatch_group_enter(dispatchGroup)
+            dispatchGroup.enter()
             if self.store.recordNameForObject(object) == nil {
                 // Record was not yet transfered to the server and will now be created
                 self.createRecord(object, completion: { (error) -> () in
                     if let error = error { errors.append(error) }
-                    dispatch_group_leave(dispatchGroup)
+                    dispatchGroup.leave()
                 })
             } else {
                 // Object was marked unsyned during an update, the server record will now be updated with new data
@@ -246,44 +246,44 @@ public class Radon<S: RadonStore, T:Syncable> {
                     return object
                     }, completion: { (error) -> () in
                         if let error = error { errors.append(error) }
-                        dispatch_group_leave(dispatchGroup)
+                        dispatchGroup.leave()
                 })
             }
         }
         
-        dispatch_group_notify(dispatchGroup, self.queue, {
-            completion(errors: errors)
+        dispatchGroup.notify(queue: self.queue, execute: {
+            completion(errors)
         })
     }
     
     // MARK: - Private methods
     
-    private func syncWithToken(token: CKServerChangeToken?, errorBlock:ErrorBlock, completion: CompletionBlock) {
+    fileprivate func syncWithToken(_ token: CKServerChangeToken?, errorBlock:ErrorBlock, completion: CompletionBlock) {
         isSyncing = true
         
         self.interface.fetchRecordChanges(onQueue: self.queue, previousServerChangeToken: token, recordChangeBlock: { [weak self] (record) in
             self?.handleRecordChangeInSync(record)
-        }, recordWithIDWasDeletedBlock: { [weak self] (id) in
-            guard let offlineObject = self?.store.objectWithIdentifier(id.recordName) else { return }
-            let recordName = String(id.recordName)
+        }, recordWithIDWasDeletedBlock: { [weak self] recordID, String in
+            guard let offlineObject = self?.store.objectWithIdentifier(recordID.recordName) else { return }
+            let recordName = recordID.recordName
             self?.store.deleteObject(offlineObject)
-            self?.externDeletionBlock?(deletedRecordID: recordName)
-        }, fetchRecordChangesCompletionBlock: { [weak self] (token, data, error) in
+            self?.externDeletionBlock?(recordName)
+        }, fetchRecordChangesCompletionBlock: { [weak self] (zoneID,token, data, moreComing, error) in
             self?.handleUnsyncedObjectsInSync(completion: { errors in
                 //TODO: handle errors array
                 
                 self?.syncToken = token
-                if error?.code == CKErrorCode.ChangeTokenExpired.rawValue {
+                if let ckerror = error as? CKError , ckerror.code == CKError.changeTokenExpired {
                     self?.syncToken = nil
                     //Delay execution for 3 seconds to not trigger execution limition of iCloud
                     //TODO: refactor this part to remove "!"
-                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(3.0 * Double(NSEC_PER_SEC))), self!.queue) { () -> Void in
+                    self!.queue.asyncAfter(deadline: DispatchTime.now() + Double(Int64(3.0 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)) { () -> Void in
                         self?.syncWithToken(nil,errorBlock: errorBlock, completion: completion)
                     }
-                    
+
                 } else {
                     self?.isSyncing = false
-                    completion(error: error)
+                    completion(error)
                     return
                 }
             })
@@ -292,7 +292,7 @@ public class Radon<S: RadonStore, T:Syncable> {
 
     }
     
-    private func createRecord(object: S.T, completion: CompletionBlock) {
+    fileprivate func createRecord(_ object: S.T, completion: CompletionBlock) {
         let dictionary = self.store.allPropertiesForObject(object)
         let record = CKRecord(dictionary: dictionary, recordType: syncableName, zoneName: syncableName)
         
@@ -301,16 +301,16 @@ public class Radon<S: RadonStore, T:Syncable> {
                 self.store.setRecordName(recordName, forObject: object)
                 self.store.setSyncStatus(true, forObject: object)
             }
-            completion(error: error)
+            completion(error)
         }
     }
     
-    private func recordForObject(object: S.T, success: (record: CKRecord) -> (), failure: (error: NSError) -> ()) {
-        dispatch_async(self.queue) { () -> Void in
+    fileprivate func recordForObject(_ object: S.T, success: @escaping (_ record: CKRecord) -> (), failure: @escaping (_ error: Error) -> ()) {
+        self.queue.async { () -> Void in
             guard let recordName = self.store.recordNameForObject(object) else {
                 self.store.setSyncStatus(false, forObject: object)
                 self.store.setRecordName(nil, forObject: object)
-                failure(error: NSError(domain: "Radon", code: 1, userInfo: [
+                failure(NSError(domain: "Radon", code: 1, userInfo: [
                     "description":"Object has not yet been synced, it will be uploaded by the next snyc"
                     ]))
                 return
@@ -320,15 +320,13 @@ public class Radon<S: RadonStore, T:Syncable> {
 
             self.interface.fetchRecord(recordID, onQueue: self.queue, fetchRecordsCompletionBlock: { (record, error) in
                 if let record = record {
-                    success(record: record)
+                    success(record)
                     return
                 }
                 if let error = error {
-                    if error.code == CKErrorCode.UnknownItem.rawValue || error.code == CKErrorCode.PartialFailure.rawValue {
-                        self.store.setSyncStatus(false, forObject: object)
-                        self.store.setRecordName(nil, forObject: object)
-                    }
-                    failure(error: error)
+                    self.store.setSyncStatus(false, forObject: object)
+                    self.store.setRecordName(nil, forObject: object)
+                    failure(error)
                     return
                 }
             })
@@ -336,46 +334,46 @@ public class Radon<S: RadonStore, T:Syncable> {
 
     }
     
-    private func deleteRecord(recordName: String, completion: CompletionBlock) {
+    fileprivate func deleteRecord(_ recordName: String, completion: CompletionBlock) {
         let recordID = CKRecordID(recordName: recordName, zoneID: self.syncableRecordZone.zoneID)
         interface.deleteRecordWithID(recordID, onQueue: self.queue) { (error) in
-            completion(error: error)
+            completion(error)
         }
     }
     
-    private func insertObject(fromRecord record:Record) {
+    fileprivate func insertObject(fromRecord record:Record) {
         let dictionary = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType:T.self)
         let newObject = self.store.newObjectFromDictionary(dictionary)
         self.store.setModificationDate(record.modificationDate, forObject: newObject)
         self.store.setRecordName(record.recordID.recordName, forObject: newObject)
         self.store.setSyncStatus(true, forObject: newObject)
-        self.externInsertBlock?(syncable: newObject)
+        self.externInsertBlock?(newObject)
     }
     
-    internal func handleQueryNotificationReason(reason: CKQueryNotificationReason, forRecordID recordID: CKRecordID) {
+    internal func handleQueryNotificationReason(_ reason: CKQueryNotificationReason, forRecordID recordID: CKRecordID) {
         switch reason {
-        case .RecordCreated:
+        case .recordCreated:
             self.interface.fetchRecord(recordID, onQueue: self.queue, fetchRecordsCompletionBlock: { [weak self] (record, error) in
                 guard let record = record else { return }
                 self?.insertObject(fromRecord: record)
             })
             
             return
-        case .RecordUpdated:
+        case .recordUpdated:
             self.interface.fetchRecord(recordID, onQueue: self.queue, fetchRecordsCompletionBlock: { [weak self] (record, error) in
                 guard let record = record else { return }
                 if  let syncable = self?.store.objectWithIdentifier(recordID.recordName) {
                     let dictionary = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType:T.self)
                     self?.store.updateObject(syncable, withDictionary: dictionary)
-                    self?.externUpdateBlock?(syncable: syncable)
+                    self?.externUpdateBlock?(syncable)
                 }
             })
             
             return
-        case .RecordDeleted:
+        case .recordDeleted:
             if let syncable = self.store.objectWithIdentifier(recordID.recordName) {
                 self.store.deleteObject(syncable)
-                self.externDeletionBlock?(deletedRecordID: recordID.recordName)
+                self.externDeletionBlock?(recordID.recordName)
             }
             return
         }
@@ -383,34 +381,34 @@ public class Radon<S: RadonStore, T:Syncable> {
     
     // MARK: - Private notification handling methods
     
-    private func notificationInfo() -> CKNotificationInfo {
+    fileprivate func notificationInfo() -> CKNotificationInfo {
         let notificationInfo = CKNotificationInfo()
         notificationInfo.shouldBadge = false
         notificationInfo.shouldSendContentAvailable = true
         return notificationInfo
     }
     
-    private func subscribeToItemUpdates() {
-        self.saveSubscriptionWithIdent("create", options: CKSubscriptionOptions.FiresOnRecordCreation)
-        self.saveSubscriptionWithIdent("update", options: CKSubscriptionOptions.FiresOnRecordUpdate)
-        self.saveSubscriptionWithIdent("delete", options: CKSubscriptionOptions.FiresOnRecordDeletion)
+    fileprivate func subscribeToItemUpdates() {
+        self.saveSubscriptionWithIdent("create", options: .firesOnRecordCreation)
+        self.saveSubscriptionWithIdent("update", options: .firesOnRecordUpdate)
+        self.saveSubscriptionWithIdent("delete", options: .firesOnRecordDeletion)
     }
     
-    private func saveSubscriptionWithIdent(ident: String, options: CKSubscriptionOptions) {
-        let subscription = CKSubscription(recordType: syncableName, predicate: NSPredicate(value: true), subscriptionID: ident, options: options)
+    fileprivate func saveSubscriptionWithIdent(_ ident: String, options: CKQuerySubscriptionOptions) {
+        let subscription = CKQuerySubscription(recordType: syncableName, predicate: NSPredicate(value: true), subscriptionID: ident, options: options)
         subscription.notificationInfo = self.notificationInfo();
-        self.privateDatabase.saveSubscription(subscription) { (subscription, error) -> Void in
+        self.privateDatabase.save(subscription) { (subscription, error) -> Void in
             //TODO: handle error
         }
     }
     
     // MARK: - Private user and token handling methods
     
-    private func saveUserID(userID: String?) {
-        defaultsStoreable.saveObject(userID, forKey: RadoniCloudUserConstant)
+    fileprivate func saveUserID(_ userID: String?) {
+        defaultsStoreable.saveObject(userID as AnyObject?, forKey: RadoniCloudUserConstant)
     }
     
-    private func loadUserID() -> String? {
+    fileprivate func loadUserID() -> String? {
         return defaultsStoreable.loadObjectForKey(RadoniCloudUserConstant) as? String
     }
     

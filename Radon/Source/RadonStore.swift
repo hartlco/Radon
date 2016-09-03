@@ -11,21 +11,21 @@ import Foundation
 public protocol RadonStore {
     associatedtype T:Syncable
     
-    func allPropertiesForObject(object: T) -> [String:Any]
-    func recordNameForObject(object: T) -> String?
-    func newObject(newObjectBlock: ((newObject: T) -> (T))) -> () -> (T)
+    func allPropertiesForObject(_ object: T) -> [String:Any]
+    func recordNameForObject(_ object: T) -> String?
+    func newObject(_ newObjectBlock: ((_ newObject: T) -> (T))) -> () -> (T)
     
     /// local update, values come from user, local modification date needs to be updated
-    func updateObject(objectUpdateBlock: () -> (T)) -> (() -> (T))
-    func objectWithIdentifier(identifier: String?) -> T?
-    func newObjectFromDictionary(dictionary: [String:Any]) -> T
-    func deleteObject(object: T)
+    func updateObject(_ objectUpdateBlock: @escaping () -> (T)) -> (() -> (T))
+    func objectWithIdentifier(_ identifier: String?) -> T?
+    func newObjectFromDictionary(_ dictionary: [String:Any]) -> T
+    func deleteObject(_ object: T)
     func allUnsyncedObjects() -> [T]
     
     /// external update, new values come from server and need to update local model
-    func updateObject(object: T, withDictionary dictionary: [String:Any])
-    func setRecordName(recordName: String?, forObject object: T)
-    func setSyncStatus(syncStatus: Bool, forObject object: T)
-    func setModificationDate(modificationDate: NSDate?, forObject object: T)
-    func modificationDateForObject(object: T) -> NSDate
+    func updateObject(_ object: T, withDictionary dictionary: [String:Any])
+    func setRecordName(_ recordName: String?, forObject object: T)
+    func setSyncStatus(_ syncStatus: Bool, forObject object: T)
+    func setModificationDate(_ modificationDate: Date?, forObject object: T)
+    func modificationDateForObject(_ object: T) -> Date
 }

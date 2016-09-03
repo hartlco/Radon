@@ -15,11 +15,11 @@ class ExampleRadonStore: RadonStore {
     
     var internAllObjects = [T]()
     let storeKey = "radonObjects"
-    let userDeaults = NSUserDefaults.standardUserDefaults()
+    let userDeaults = UserDefaults.standard
     
     init() {
         let allObjects = [TestClass]()
-        userDeaults.setObject(allObjects, forKey: storeKey)
+        userDeaults.set(allObjects, forKey: storeKey)
         userDeaults.synchronize()
     }
     
@@ -27,38 +27,38 @@ class ExampleRadonStore: RadonStore {
         return internAllObjects
     }
     
-    func recordNameForObject(object: T) -> String? {
+    func recordNameForObject(_ object: T) -> String? {
         return object.internRecordID
     }
     
-    func setRecordName(recordName: String?, forObject object: T) {
+    func setRecordName(_ recordName: String?, forObject object: T) {
         object.internRecordID = recordName
     }
     
-    func newObject(newObjectBlock: ((newObject: T) -> (T))) -> () -> (T) {
+    func newObject(_ newObjectBlock: ((_ newObject: T) -> (T))) -> () -> (T) {
         return {
             srandom(UInt32(time(nil)))
-            let newObject = TestClass(string: String(random()), int: random(), double: 323432.234)
-            newObjectBlock(newObject: newObject)
+            let newObject = TestClass(string: String(Int(arc4random())), int: Int(arc4random()), double: 323432.234)
+            _ = newObjectBlock(newObject)
             self.addObject(newObject)
             return newObject
         }
     }
     
-    func updateObject(objectUpdateBlock: () -> (T)) -> (() -> (T)) {
+    func updateObject(_ objectUpdateBlock: @escaping () -> T) -> (() -> T) {
         return {
             return objectUpdateBlock()
         }
     }
     
-    func newObjectFromDictionary(dictionary: [String : Any]) -> T {
+    func newObjectFromDictionary(_ dictionary: [String : Any]) -> T {
         let newObject = T(dictionary: dictionary)
         guard let object = newObject else { fatalError("Can't initializes object from dictionary") }
         self.addObject(object)
         return object
     }
     
-    func objectWithIdentifier(identifier: String?) -> T? {
+    func objectWithIdentifier(_ identifier: String?) -> T? {
         if let identifier = identifier {
             for object in allObjects() {
                 if let recID = object.internRecordID {
@@ -75,20 +75,20 @@ class ExampleRadonStore: RadonStore {
         
     }
     
-    func addObject(object: T) {
+    func addObject(_ object: T) {
         internAllObjects.append(object)
     }
     
-    func updateObject(object: T) {
+    func updateObject(_ object: T) {
         let oldObjet = objectWithIdentifier(object.recordID())
         self.deleteObject(oldObjet!)
         self.addObject(object)
     }
     
-    func deleteObject(object: T) {
+    func deleteObject(_ object: T) {
         let objectToDeleteInDatabase = objectWithIdentifier(object.recordID())
-        let index = self.internAllObjects.indexOf(objectToDeleteInDatabase!)
-        self.internAllObjects.removeAtIndex(index!)
+        let index = self.internAllObjects.index(of: objectToDeleteInDatabase!)
+        self.internAllObjects.remove(at: index!)
         
     }
     
@@ -101,29 +101,29 @@ class ExampleRadonStore: RadonStore {
         }
     }
     
-    func updateObject(object: T, withDictionary dictionary: [String : Any]) {
+    func updateObject(_ object: T, withDictionary dictionary: [String : Any]) {
         object.updateWithDictionary(dictionary)
     }
     
-    func setSyncStatus(syncStatus: Bool, forObject object: T) {
+    func setSyncStatus(_ syncStatus: Bool, forObject object: T) {
         object.internSyncStatus = syncStatus
     }
     
-    func setRecordID(recordID: String?, forObject object: T) {
+    func setRecordID(_ recordID: String?, forObject object: T) {
         object.internRecordID = recordID
     }
     
-    func modificationDateForObject(object: T) -> NSDate {
-        return object.internModificationDate
+    func modificationDateForObject(_ object: T) -> Date {
+        return object.internModificationDate as Date
     }
     
-    func setModificationDate(modificationDate: NSDate?, forObject object: T) {
+    func setModificationDate(_ modificationDate: Date?, forObject object: T) {
         if let modificationDate = modificationDate {
             object.internModificationDate = modificationDate
         }
     }
     
-    func allPropertiesForObject(object: T) -> [String : Any] {
+    func allPropertiesForObject(_ object: T) -> [String : Any] {
         return [
             "string":object.string,
             "int":object.int,
@@ -131,7 +131,7 @@ class ExampleRadonStore: RadonStore {
         ]
     }
     
-    func recordIDForObject(object: T) -> String? {
+    func recordIDForObject(_ object: T) -> String? {
         return object.internRecordID
     }
     
