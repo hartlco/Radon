@@ -244,9 +244,9 @@ open class Radon<S: RadonStore, T:Syncable> {
                 // Object was marked unsyned during an update, the server record will now be updated with new data
                 self.updateObject({ () -> S.T in
                     return object
-                    }, completion: { (error) -> () in
-                        if let error = error { errors.append(error) }
-                        dispatchGroup.leave()
+                }, completion: { (error) -> () in
+                    if let error = error { errors.append(error) }
+                    dispatchGroup.leave()
                 })
             }
         }
