@@ -306,6 +306,21 @@ class RadonTests: XCTestCase {
         waitForExpectations(timeout: 5, handler: nil)
     }
     
+    func testSyncRecordDeleteNotFound() {
+        let recordID = CKRecordID(recordName: "Mock")
+        mockInterface.recordIDtoDeleteInSync = recordID
+        let expectation = self.expectation(description: "Delete object from sync")
+        XCTAssert(store.objectWithIdentifier("Mock") == nil)
+        radon.sync({ (error) in
+            
+        }) { (error) in
+            XCTAssert(self.store.objectWithIdentifier("Mock") == nil)
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 5, handler: nil)
+    }
+    
     
 //    func testServerChangeToken() {
 //        let mockInterface = MockCloudKitInterface()
