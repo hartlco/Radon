@@ -228,7 +228,7 @@ open class Radon<S: RadonStore, T:Syncable> {
         }
     }
     
-    internal func handleUnsyncedObjectsInSync(completion: @escaping (_ errors: [Error]) -> ()) {
+    internal func createOrUpdateUnsyncedObjectsInSync(completion: @escaping (_ errors: [Error]) -> ()) {
         let dispatchGroup = DispatchGroup()
         var errors = [Error]()
         
@@ -269,7 +269,7 @@ open class Radon<S: RadonStore, T:Syncable> {
             self?.store.deleteObject(offlineObject)
             self?.externDeletionBlock?(recordName)
         }, fetchRecordChangesCompletionBlock: { [weak self] (zoneID,token, data, moreComing, error) in
-            self?.handleUnsyncedObjectsInSync(completion: { errors in
+            self?.createOrUpdateUnsyncedObjectsInSync(completion: { errors in
                 //TODO: handle errors array
                 
                 self?.syncToken = token
