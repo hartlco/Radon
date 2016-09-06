@@ -321,6 +321,20 @@ class RadonTests: XCTestCase {
         waitForExpectations(timeout: 5, handler: nil)
     }
     
+    func testSyncUploadUnsyncedObjects() {
+        let testObject = TestClass(string: "hi", int: 1, double: 1)
+        store.addObject(testObject)
+        let expectation = self.expectation(description: "Upload object in sync")
+        radon.sync({ (error) in
+            
+        }) { (error) in
+            XCTAssert(self.store.objectWithIdentifier("Mock") != nil)
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 5, handler: nil)
+    }
+    
     
 //    func testServerChangeToken() {
 //        let mockInterface = MockCloudKitInterface()
