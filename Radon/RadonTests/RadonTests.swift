@@ -336,6 +336,18 @@ class RadonTests: XCTestCase {
     }
     
     
+    func testCheckIfUserChangedNoPreviousUser() {
+        mockInterface.fetchUserIDNil = true
+        let expectation = self.expectation(description: "Check if user changed")
+        radon.checkIfiCloudUserChanged { (state) in
+            if case let state = state , state == .firstSync {
+                XCTAssert(true)
+                expectation.fulfill()
+            }
+        }
+        waitForExpectations(timeout: 5, handler: nil)
+    }
+    
 //    func testServerChangeToken() {
 //        let mockInterface = MockCloudKitInterface()
 //        mockInterface.failsCreateRecord = true
