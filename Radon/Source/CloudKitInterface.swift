@@ -10,14 +10,12 @@ import Foundation
 import CloudKit
 
 public protocol Record {
-    var recordID: CKRecordID {get}
+    var recordID: CKRecordID { get }
     var modificationDate: Date? { get }
     func valuesDictionaryForKeys(_ keys: [String], syncableType: Syncable.Type) -> [String:Any]
 }
 
-extension CKRecord: Record {
-    
-}
+extension CKRecord: Record {}
 
 public protocol CloudKitInterface {
     
@@ -35,6 +33,8 @@ public protocol CloudKitInterface {
     func deleteRecordWithID(_ recordID: CKRecordID, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: ((Error?) -> Void))
     
     func fetchRecordChanges(onQueue queue: DispatchQueue, previousServerChangeToken: CKServerChangeToken?, recordChangeBlock: ((Record) -> Void), recordWithIDWasDeletedBlock: ((CKRecordID, String) -> Void), fetchRecordChangesCompletionBlock: ((CKRecordZoneID, CKServerChangeToken?, Data?, Bool, Error?) -> Void))
+    
+    func fetchUserRecordIDWithCompletionHandler(_ completionHandler: @escaping (CKRecordID?, Error?) -> Void)
 }
 
 open class RadonCloudKit: CloudKitInterface {
@@ -113,6 +113,10 @@ open class RadonCloudKit: CloudKitInterface {
         
         fetchRecordZoneChangesOperation.start()
         
+    }
+    
+    public func fetchUserRecordIDWithCompletionHandler(_ completionHandler: @escaping (CKRecordID?, Error?) -> Void) {
+        self.container.fetchUserRecordID(completionHandler: completionHandler)
     }
 }
 
