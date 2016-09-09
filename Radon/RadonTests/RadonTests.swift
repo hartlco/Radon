@@ -20,6 +20,7 @@ class RadonTests: XCTestCase {
         store = ExampleRadonStore()
         mockInterface = MockCloudKitInterface()
         radon = Radon<ExampleRadonStore, TestClass>(store: store, interface: mockInterface, recordZoneErrorBlock: nil)
+        radon.defaultsStoreable = MockDefaultsStoreable()
     }
     
     func testDateExtensionEalier() {
@@ -336,8 +337,7 @@ class RadonTests: XCTestCase {
     }
     
     
-    func testCheckIfUserChangedNoPreviousUser() {
-        mockInterface.fetchUserIDNil = true
+    func testCheckIfUserChangedFirstSync() {
         let expectation = self.expectation(description: "Check if user changed")
         radon.checkIfiCloudUserChanged { (state) in
             if case let state = state , state == .firstSync {
@@ -348,16 +348,41 @@ class RadonTests: XCTestCase {
         waitForExpectations(timeout: 5, handler: nil)
     }
     
-//    func testServerChangeToken() {
-//        let mockInterface = MockCloudKitInterface()
-//        mockInterface.failsCreateRecord = true
-//        let store = ExampleRadonStore()
-//        let radon = Radon<ExampleRadonStore, TestClass>(store: store, interface: mockInterface) { (error) in
-//            
-//        }
-//        radon.defaultsStoreable = MockDefaultsStoreable()
-//        let changeData = "123456".dataUsingEncoding(NSUTF8StringEncoding)
-//        radon.syncToken = CKServerChangeToken()
-//    }
+    func testCheckIfUserChanged() {
+        let firstExpectation = self.expectation(description: "First check")
+        radon.checkIfiCloudUserChanged { (state) in
+            firstExpectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 5, handler: nil)
+        let secondExpectation = self.expectation(description: "Second check")
+        radon.checkIfiCloudUserChanged { (state) in
+            if case let state = state, state == .changed {
+                XCTAssert(true)
+                secondExpectation.fulfill()
+            }
+        }
+        
+        waitForExpectations(timeout: 5, handler: nil)
+    }
+    
+    func testCheckIfUserChangedAlreadySynced() {
+        mockInterface.fetchSameUserRecord = true
+        let firstExpectation = self.expectation(description: "First check")
+        radon.checkIfiCloudUserChanged { (state) in
+            firstExpectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 5, handler: nil)
+        let secondExpectation = self.expectation(description: "Second check")
+        radon.checkIfiCloudUserChanged { (state) in
+            if case let state = state, state == .alreadySynced {
+                XCTAssert(true)
+                secondExpectation.fulfill()
+            }
+        }
+        
+        waitForExpectations(timeout: 5, handler: nil)
+    }
     
 }

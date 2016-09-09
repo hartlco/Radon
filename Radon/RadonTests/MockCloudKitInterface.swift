@@ -57,7 +57,7 @@ class MockCloudKitInterface: CloudKitInterface {
     var syncRecordChangeHasNewObject = false
     var syncOlderObject = false
     var recordIDtoDeleteInSync: CKRecordID? = nil
-    var fetchUserIDNil = false
+    var fetchSameUserRecord = false
     
     func saveRecordZone(_ zone: CKRecordZone, completionHandler: (CKRecordZone?, Error?) -> Void) {
         if failsSaveRecordZone {
@@ -134,8 +134,12 @@ class MockCloudKitInterface: CloudKitInterface {
     }
     
     func fetchUserRecordIDWithCompletionHandler(_ completionHandler: @escaping (CKRecordID?, Error?) -> Void) {
-        if fetchUserIDNil {
-            completionHandler(nil, nil)
+        if fetchSameUserRecord {
+            let recordID = CKRecordID(recordName: "Mock")
+            completionHandler(recordID, nil)
+        } else {
+            let recordID = CKRecordID(recordName: String(arc4random()))
+            completionHandler(recordID, nil)
         }
     }
     
