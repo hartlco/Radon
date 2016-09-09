@@ -96,14 +96,12 @@ open class Radon<S: RadonStore, T:Syncable> {
     fileprivate let store: S
     fileprivate let syncableName = String(describing: T.self)
     fileprivate let syncableRecordZone = CKRecordZone(zoneName: String(describing: T.self))
-    fileprivate let container: CKContainer
     fileprivate let interface: CloudKitInterface
     
     //TODO: Initiliazer can fail, handle with throw or optional
     public init(store: S, interface: CloudKitInterface, recordZoneErrorBlock: ((_ error: Error) -> ())?) {
         
         self.privateDatabase = interface.privateDatabase
-        self.container = interface.container
         self.interface = interface
         
         interface.saveRecordZone(syncableRecordZone) { (zone, error) -> Void in
@@ -188,19 +186,17 @@ open class Radon<S: RadonStore, T:Syncable> {
     
     open func checkIfiCloudUserChanged(_ success: @escaping (_ userStatus: RadoniCloudUserState) -> ()) {
         self.interface.fetchUserRecordIDWithCompletionHandler { (recordID, error) in
-            guard let currentUserID = self.loadUserID() else {
-                self.saveUserID(recordID?.recordName)
+            guard let currentUserID = self.loadUserRecordName() else {
+                self.saveUserRecordName(recordID?.recordName)
                 success(.firstSync)
                 return
             }
             
             if let recordID = recordID?.recordName , recordID == currentUserID {
                 success(.alreadySynced)
-                return
             } else {
-                self.saveUserID(recordID?.recordName)
+                self.saveUserRecordName(recordID?.recordName)
                 success(.changed)
-                return
             }
         }
     }
@@ -404,11 +400,11 @@ open class Radon<S: RadonStore, T:Syncable> {
     
     // MARK: - Private user and token handling methods
     
-    fileprivate func saveUserID(_ userID: String?) {
+    fileprivate func saveUserRecordName(_ userID: String?) {
         defaultsStoreable.saveObject(userID as AnyObject?, forKey: RadoniCloudUserConstant)
     }
     
-    fileprivate func loadUserID() -> String? {
+    fileprivate func loadUserRecordName() -> String? {
         return defaultsStoreable.loadObjectForKey(RadoniCloudUserConstant) as? String
     }
     
