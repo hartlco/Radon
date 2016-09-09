@@ -1,6 +1,6 @@
 language: objective-c
 xcode_project: Radon/Radon.xcodeproj # path to your xcodeproj folder
 xcode_scheme: RadonTests
+osx_image: xcode8
 xcode_sdk: iphonesimulator10.0
-osx_image: xcode8.0
 os: osx
