@@ -1,0 +1,4 @@
+language: swift
+xcode_project: Radon/Radon.xcodeproj # path to your xcodeproj folder
+xcode_scheme: Radon
+xcode_sdk: iphonesimulator
