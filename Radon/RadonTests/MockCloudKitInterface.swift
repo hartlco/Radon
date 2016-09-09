@@ -67,7 +67,7 @@ class MockCloudKitInterface: CloudKitInterface {
         }
     }
     
-    func createRecord(_ record: CKRecord, onQueue queue: DispatchQueue, createRecordCompletionBlock modifyRecordsCompletionBlock: ((_ recordName: String?, _ error: Error?) -> Void)) {
+    func createRecord(_ record: CKRecord, onQueue queue: DispatchQueue, createRecordCompletionBlock modifyRecordsCompletionBlock: @escaping ((_ recordName: String?, _ error: Error?) -> Void)) {
         
         if failsCreateRecord {
             modifyRecordsCompletionBlock(nil, MockError())
@@ -77,7 +77,7 @@ class MockCloudKitInterface: CloudKitInterface {
         }
     }
     
-    func fetchRecord(_ recordID: CKRecordID, onQueue queue: DispatchQueue, fetchRecordsCompletionBlock: ((CKRecord?, Error?) -> Void)) {
+    func fetchRecord(_ recordID: CKRecordID, onQueue queue: DispatchQueue, fetchRecordsCompletionBlock: @escaping ((CKRecord?, Error?) -> Void)) {
         
         let mockStore = ExampleRadonStore()
         let object = TestClass(string: "Mock", int: 1, double: 2)
@@ -91,7 +91,7 @@ class MockCloudKitInterface: CloudKitInterface {
         }
     }
     
-    func modifyRecord(_ record: CKRecord, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: (([CKRecord]?, [CKRecordID]?, Error?) -> Void)) {
+    func modifyRecord(_ record: CKRecord, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping (([CKRecord]?, [CKRecordID]?, Error?) -> Void)) {
         
         if failsModifyRecord {
             modifyRecordsCompletionBlock(nil, nil, MockError())
@@ -100,7 +100,7 @@ class MockCloudKitInterface: CloudKitInterface {
         }
     }
     
-    func deleteRecordWithID(_ recordID: CKRecordID, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: ((Error?) -> Void)) {
+    func deleteRecordWithID(_ recordID: CKRecordID, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping ((Error?) -> Void)) {
         if failsDeleteRecord {
             modifyRecordsCompletionBlock(MockError())
         } else {
@@ -109,7 +109,7 @@ class MockCloudKitInterface: CloudKitInterface {
     }
     
     
-    func fetchRecordChanges(onQueue queue: DispatchQueue, previousServerChangeToken: CKServerChangeToken?, recordChangeBlock: ((Record) -> Void), recordWithIDWasDeletedBlock: ((CKRecordID, String) -> Void), fetchRecordChangesCompletionBlock: ((CKRecordZoneID, CKServerChangeToken?, Data?, Bool, Error?) -> Void)) {
+    func fetchRecordChanges(onQueue queue: DispatchQueue, previousServerChangeToken: CKServerChangeToken?, recordChangeBlock: @escaping ((Record) -> Void), recordWithIDWasDeletedBlock: @escaping ((CKRecordID, String) -> Void), fetchRecordChangesCompletionBlock: @escaping ((CKRecordZoneID, CKServerChangeToken?, Data?, Bool, Error?) -> Void)) {
         
         let zoneID = CKRecordZoneID(zoneName: "Mock", ownerName: "Mock")
         

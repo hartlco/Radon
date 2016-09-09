@@ -126,7 +126,7 @@ open class Radon<S: RadonStore, T:Syncable> {
      - parameter error: Error block that may execute if an error during the sync occurs
      - parameter completion: The completionBlock, containing an optional NSError object, that is triggered when the operation finishes
      */
-    open func sync(_ error: ErrorBlock, completion: CompletionBlock) {
+    open func sync(_ error: @escaping ErrorBlock, completion: @escaping CompletionBlock) {
         self.syncWithToken(self.syncToken, errorBlock: error, completion: completion)
     }
     
@@ -139,7 +139,7 @@ open class Radon<S: RadonStore, T:Syncable> {
      - parameter completion: Block that is executed after the object was sucessfully created in the CloudKit backend
  
      */
-    open func createObject(_ newObjectBlock: ((_ newObject: S.T) -> (S.T)), completion: CompletionBlock) {
+    open func createObject(_ newObjectBlock: @escaping ((_ newObject: S.T) -> (S.T)), completion: @escaping CompletionBlock) {
         let newObject = self.store.newObject(newObjectBlock)()
         self.createRecord(newObject, completion: completion)
     }
@@ -149,7 +149,7 @@ open class Radon<S: RadonStore, T:Syncable> {
      
  
      */
-    open func updateObject(_ updateBlock: @escaping () -> (S.T), completion: CompletionBlock) {
+    open func updateObject(_ updateBlock: @escaping () -> (S.T), completion: @escaping CompletionBlock) {
         self.queue.async { () -> Void in
             let updatedObject = self.store.updateObject(updateBlock)()
             self.store.setModificationDate(Date(), forObject: updatedObject)
@@ -171,7 +171,7 @@ open class Radon<S: RadonStore, T:Syncable> {
         }
     }
     
-    open func deleteObject(_ object: S.T, completion: CompletionBlock) {
+    open func deleteObject(_ object: S.T, completion: @escaping CompletionBlock) {
         let recordName = self.store.recordNameForObject(object)
         self.store.deleteObject(object)
         if let recordName = recordName {
@@ -254,7 +254,7 @@ open class Radon<S: RadonStore, T:Syncable> {
     
     // MARK: - Private methods
     
-    fileprivate func syncWithToken(_ token: CKServerChangeToken?, errorBlock:ErrorBlock, completion: CompletionBlock) {
+    fileprivate func syncWithToken(_ token: CKServerChangeToken?, errorBlock: @escaping ErrorBlock, completion: @escaping CompletionBlock) {
         isSyncing = true
         
         self.interface.fetchRecordChanges(onQueue: self.queue, previousServerChangeToken: token, recordChangeBlock: { [weak self] (record) in
@@ -288,7 +288,7 @@ open class Radon<S: RadonStore, T:Syncable> {
 
     }
     
-    fileprivate func createRecord(_ object: S.T, completion: CompletionBlock) {
+    fileprivate func createRecord(_ object: S.T, completion: @escaping CompletionBlock) {
         let dictionary = self.store.allPropertiesForObject(object)
         let record = CKRecord(dictionary: dictionary, recordType: syncableName, zoneName: syncableName)
         
@@ -330,7 +330,7 @@ open class Radon<S: RadonStore, T:Syncable> {
 
     }
     
-    fileprivate func deleteRecord(_ recordName: String, completion: CompletionBlock) {
+    fileprivate func deleteRecord(_ recordName: String, completion: @escaping CompletionBlock) {
         let recordID = CKRecordID(recordName: recordName, zoneID: self.syncableRecordZone.zoneID)
         interface.deleteRecordWithID(recordID, onQueue: self.queue) { (error) in
             completion(error)

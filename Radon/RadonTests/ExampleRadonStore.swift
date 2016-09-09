@@ -35,7 +35,7 @@ class ExampleRadonStore: RadonStore {
         object.internRecordID = recordName
     }
     
-    func newObject(_ newObjectBlock: ((_ newObject: T) -> (T))) -> () -> (T) {
+    func newObject(_ newObjectBlock: @escaping ((_ newObject: T) -> (T))) -> () -> (T) {
         return {
             srandom(UInt32(time(nil)))
             let newObject = TestClass(string: String(Int(arc4random())), int: Int(arc4random()), double: 323432.234)

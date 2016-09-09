@@ -13,7 +13,7 @@ public protocol RadonStore {
     
     func allPropertiesForObject(_ object: T) -> [String:Any]
     func recordNameForObject(_ object: T) -> String?
-    func newObject(_ newObjectBlock: ((_ newObject: T) -> (T))) -> () -> (T)
+    func newObject(_ newObjectBlock: @escaping ((_ newObject: T) -> (T))) -> () -> (T)
     
     /// local update, values come from user, local modification date needs to be updated
     func updateObject(_ objectUpdateBlock: @escaping () -> (T)) -> (() -> (T))
