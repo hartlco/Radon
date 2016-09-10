@@ -271,8 +271,7 @@ open class Radon<S: RadonStore, T:Syncable> {
                 if let ckerror = error as? CKError , ckerror.code == CKError.changeTokenExpired {
                     self?.syncToken = nil
                     //Delay execution for 3 seconds to not trigger execution limition of iCloud
-                    //TODO: refactor this part to remove "!"
-                    self!.queue.asyncAfter(deadline: DispatchTime.now() + Double(Int64(3.0 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)) { () -> Void in
+                    self?.queue.asyncAfter(deadline: DispatchTime.now() + Double(Int64(3.0 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)) { () -> Void in
                         self?.syncWithToken(nil,errorBlock: errorBlock, completion: completion)
                     }
 
