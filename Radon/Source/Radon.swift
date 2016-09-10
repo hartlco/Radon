@@ -64,8 +64,7 @@ open class Radon<S: RadonStore, T:Syncable> {
     
     open var externUpdateBlock: ((_ syncable: S.T) -> ())? = nil
     
-    //TODO: rename to recordName
-    open var externDeletionBlock: ((_ deletedRecordID: String?) -> ())? = nil
+    open var externDeletionBlock: ((_ deletedRecordName: String?) -> ())? = nil
     
     open var defaultsStoreable: DefaultsStoreable = UserDefaults.standard
     
