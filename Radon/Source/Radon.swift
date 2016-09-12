@@ -57,14 +57,22 @@ open class Radon<S: RadonStore, T:Syncable> {
     public typealias CompletionBlock = (_ error: Error?) -> ()
     public typealias ErrorBlock = (_ error: Error) -> ()
     
+    
     /// queue: Defines the `dispatch_queue_t`object on which all `RadonStore` and general completion operations are executed.
     open var queue: DispatchQueue = DispatchQueue.main
     
+    
+    /// externInsertBlock: If this block is set, it's triggered every time a new, unkown object was inserted from the backend
     open var externInsertBlock: ((_ syncable: S.T) -> ())? = nil
     
+    
+    /// externUpdateBlock: If this block is set, it's triggered every time a already existing object received an update from the backend.
     open var externUpdateBlock: ((_ syncable: S.T) -> ())? = nil
     
+    
+    /// externDeletionBlock: If this block is set, it's triggered every time a existing object was deleted from the backend and got deleted by Radion
     open var externDeletionBlock: ((_ deletedRecordName: String?) -> ())? = nil
+    
     
     open var defaultsStoreable: DefaultsStoreable = UserDefaults.standard
     
