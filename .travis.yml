@@ -6,4 +6,3 @@ xcode_sdk: iphonesimulator10.0
 os: osx
 script:
 - xcodebuild -project Radon/Radon.xcodeproj -scheme RadonTests -sdk iphonesimulator ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO
-- xcodebuild test -project Radon/Radon.xcodeproj -scheme RadonTests -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 6,OS=10.0' ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO
