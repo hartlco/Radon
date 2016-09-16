@@ -6,6 +6,8 @@ Radon CloudKit Sync provides a way to synchronise a model of an Application with
 
 Radon is still a work in progress. Currently it handles synchronisation of every model class separately. Relationships need to be handled by the developer itself.
 
+Have a look at the project tab to see on what I'm currently working on.
+
 Radon is currently used in the App [Noteness](https://hartl.co/apps/noteness).
 
 ## Installation
