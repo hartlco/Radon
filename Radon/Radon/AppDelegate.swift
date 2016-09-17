@@ -13,30 +13,6 @@ import CloudKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-
-
-    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-        
-        
-        let notificationSettings = UIUserNotificationSettings(types: [], categories: nil)
-        application.registerUserNotificationSettings(notificationSettings)
-        application.registerForRemoteNotifications()
-        
-        return true
-    }
     
-    func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
-        
-        guard let userInfo = userInfo as? [String:NSObject] else {
-            return
-        }
-        
-        let cloudKitNotification = CKNotification(fromRemoteNotificationDictionary: userInfo)
-        if cloudKitNotification.notificationType == .query {
-            if let queryNotification = cloudKitNotification as? CKQueryNotification {
-                TestClassRadon.radon.handleQueryNotification(queryNotification)
-            }
-        }
-    }
 }
 
