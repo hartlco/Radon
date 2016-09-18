@@ -24,7 +24,7 @@ public protocol CloudKitInterface {
     
     func saveRecordZone(_ zone: CKRecordZone, completionHandler: (CKRecordZone?, Error?) -> Void)
     
-    func createRecord(_ record: CKRecord, onQueue queue: DispatchQueue, createRecordCompletionBlock: @escaping ((_ recordName:String?,_ error:Error?) -> Void))
+    func createRecord(withDictionary dictionary: [String : Any], onQueue queue: DispatchQueue, createRecordCompletionBlock: @escaping ((_ recordName:String?,_ error:Error?) -> Void))
     
     func fetchRecord(_ recordID: CKRecordID, onQueue queue: DispatchQueue, fetchRecordsCompletionBlock: @escaping ((CKRecord?, Error?) -> Void))
     
@@ -42,11 +42,13 @@ open class RadonCloudKit: CloudKitInterface {
     open let container: CKContainer
     open let privateDatabase: CKDatabase
     open let syncableRecordZone: CKRecordZone
+    private let syncableName: String
     
-    init(cloudKitIdentifier: String, recordZoneName: String) {
+    init(cloudKitIdentifier: String, recordZoneName: String, syncableName: String) {
         self.container = CKContainer(identifier: cloudKitIdentifier)
         self.privateDatabase = self.container.privateCloudDatabase
         self.syncableRecordZone = CKRecordZone(zoneName: recordZoneName)
+        self.syncableName = syncableName
     }
     
     open func saveRecordZone(_ zone: CKRecordZone, completionHandler: (CKRecordZone?, Error?) -> Void) {
@@ -55,11 +57,12 @@ open class RadonCloudKit: CloudKitInterface {
         }
     }
     
-    open func createRecord(_ record: CKRecord, onQueue queue: DispatchQueue, createRecordCompletionBlock modifyRecordsCompletionBlock: @escaping ((_ recordName:String?, _ error:Error?) -> Void)) {
+    public func createRecord(withDictionary dictionary: [String : Any], onQueue queue: DispatchQueue, createRecordCompletionBlock: (@escaping (String?, Error?) -> Void)) {
+        let record = CKRecord(dictionary: dictionary, recordType: syncableName, zoneName: syncableName)
         let createOperation = CKModifyRecordsOperation(recordsToSave: [record], recordIDsToDelete: nil)
         createOperation.database = self.privateDatabase
         createOperation.rad_setModifyRecordsCompletionBlock(onQueue: queue, modifyRecordsCompletionBlock: { (records, recordIDs, error) in
-            modifyRecordsCompletionBlock(records?.first?.recordID.recordName,error)
+            createRecordCompletionBlock(records?.first?.recordID.recordName,error)
         })
         createOperation.start()
     }

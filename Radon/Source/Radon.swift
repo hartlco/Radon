@@ -120,7 +120,7 @@ open class Radon<S: RadonStore, T:Syncable> {
     }
     
     public convenience init(store: S, cloudKitIdentifier: String) {
-        self.init(store: store, interface: RadonCloudKit(cloudKitIdentifier: cloudKitIdentifier, recordZoneName: String(describing: T.self)), recordZoneErrorBlock: nil)
+        self.init(store: store, interface: RadonCloudKit(cloudKitIdentifier: cloudKitIdentifier, recordZoneName: String(describing: T.self), syncableName: String(describing: T.self)), recordZoneErrorBlock: nil)
     }
     
     
@@ -296,9 +296,8 @@ open class Radon<S: RadonStore, T:Syncable> {
     
     fileprivate func createRecord(_ object: S.T, completion: @escaping CompletionBlock) {
         let dictionary = self.store.allPropertiesForObject(object)
-        let record = CKRecord(dictionary: dictionary, recordType: syncableName, zoneName: syncableName)
         
-        self.interface.createRecord(record, onQueue: self.queue) { (recordName, error) in
+        self.interface.createRecord(withDictionary: dictionary, onQueue: self.queue) { (recordName, error) in
             if let recordName = recordName {
                 self.store.setRecordName(recordName, forObject: object)
                 self.store.setSyncStatus(true, forObject: object)
