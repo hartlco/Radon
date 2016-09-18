@@ -67,12 +67,11 @@ class MockCloudKitInterface: CloudKitInterface {
         }
     }
     
-    func createRecord(_ record: CKRecord, onQueue queue: DispatchQueue, createRecordCompletionBlock modifyRecordsCompletionBlock: @escaping ((_ recordName: String?, _ error: Error?) -> Void)) {
-        
+    func createRecord(withDictionary dictionary: [String : Any], onQueue queue: DispatchQueue, createRecordCompletionBlock: (@escaping (String?, Error?) -> Void)) {
         if failsCreateRecord {
-            modifyRecordsCompletionBlock(nil, MockError())
+            createRecordCompletionBlock(nil, MockError())
         } else {
-            modifyRecordsCompletionBlock("Mock", nil)
+            createRecordCompletionBlock("Mock", nil)
             
         }
     }
