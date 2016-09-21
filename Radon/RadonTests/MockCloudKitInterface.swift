@@ -76,7 +76,7 @@ class MockCloudKitInterface: CloudKitInterface {
         }
     }
     
-    func fetchRecord(_ recordID: CKRecordID, onQueue queue: DispatchQueue, fetchRecordsCompletionBlock: @escaping ((CKRecord?, Error?) -> Void)) {
+    func fetchRecord(_ recordName: String, onQueue queue: DispatchQueue, fetchRecordsCompletionBlock: @escaping ((CKRecord?, Error?) -> Void)) {
         
         let mockStore = ExampleRadonStore()
         let object = TestClass(string: "Mock", int: 1, double: 2)
