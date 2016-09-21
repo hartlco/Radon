@@ -316,10 +316,8 @@ open class Radon<S: RadonStore, T:Syncable> {
                     ]))
                 return
             }
-            
-            let recordID = CKRecordID(recordName: recordName, zoneID: self.syncableRecordZone.zoneID)
 
-            self.interface.fetchRecord(recordID, onQueue: self.queue, fetchRecordsCompletionBlock: { (record, error) in
+            self.interface.fetchRecord(recordName, onQueue: self.queue, fetchRecordsCompletionBlock: { (record, error) in
                 if let record = record {
                     success(record)
                     return
@@ -354,14 +352,14 @@ open class Radon<S: RadonStore, T:Syncable> {
     internal func handleQueryNotificationReason(_ reason: CKQueryNotificationReason, forRecordID recordID: CKRecordID) {
         switch reason {
         case .recordCreated:
-            self.interface.fetchRecord(recordID, onQueue: self.queue, fetchRecordsCompletionBlock: { [weak self] (record, error) in
+            self.interface.fetchRecord(recordID.recordName, onQueue: self.queue, fetchRecordsCompletionBlock: { [weak self] (record, error) in
                 guard let record = record else { return }
                 self?.insertObject(fromRecord: record)
             })
             
             return
         case .recordUpdated:
-            self.interface.fetchRecord(recordID, onQueue: self.queue, fetchRecordsCompletionBlock: { [weak self] (record, error) in
+            self.interface.fetchRecord(recordID.recordName, onQueue: self.queue, fetchRecordsCompletionBlock: { [weak self] (record, error) in
                 guard let record = record else { return }
                 if  let syncable = self?.store.objectWithIdentifier(recordID.recordName) {
                     let dictionary = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType:T.self)

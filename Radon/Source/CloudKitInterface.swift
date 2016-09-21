@@ -26,7 +26,7 @@ public protocol CloudKitInterface {
     
     func createRecord(withDictionary dictionary: [String : Any], onQueue queue: DispatchQueue, createRecordCompletionBlock: @escaping ((_ recordName:String?,_ error:Error?) -> Void))
     
-    func fetchRecord(_ recordID: CKRecordID, onQueue queue: DispatchQueue, fetchRecordsCompletionBlock: @escaping ((CKRecord?, Error?) -> Void))
+    func fetchRecord(_ recordName: String, onQueue queue: DispatchQueue, fetchRecordsCompletionBlock: @escaping ((CKRecord?, Error?) -> Void))
     
     func modifyRecord(_ record: CKRecord, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping (([CKRecord]?, [CKRecordID]?, Error?) -> Void))
     
@@ -67,7 +67,8 @@ open class RadonCloudKit: CloudKitInterface {
         createOperation.start()
     }
     
-    open func fetchRecord(_ recordID: CKRecordID, onQueue queue: DispatchQueue, fetchRecordsCompletionBlock: @escaping ((CKRecord?, Error?) -> Void)) {
+    open func fetchRecord(_ recordName: String, onQueue queue: DispatchQueue, fetchRecordsCompletionBlock: @escaping ((CKRecord?, Error?) -> Void)) {
+        let recordID = CKRecordID(recordName: recordName, zoneID: self.syncableRecordZone.zoneID)
         let fetchOperation = CKFetchRecordsOperation(recordIDs: [recordID])
         fetchOperation.database = self.privateDatabase
         fetchOperation.rad_setFetchRecordsCompletionBlock(inQueue: queue, fetchRecordsCompletionBlock: { (recordsDictionary, error) in
