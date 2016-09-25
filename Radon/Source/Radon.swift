@@ -51,7 +51,7 @@ extension UserDefaults: DefaultsStoreable {
     }
 }
 
-open class Radon<S: RadonStore, T:Syncable> {
+open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudKitInterface> {
     
     /// CompletionBlock: Simple typealias for a completionBlock taking an NSError optional.
     public typealias CompletionBlock = (_ error: Error?) -> ()
@@ -103,10 +103,10 @@ open class Radon<S: RadonStore, T:Syncable> {
     fileprivate let store: S
     fileprivate let syncableName = String(describing: T.self)
     fileprivate let syncableRecordZone = CKRecordZone(zoneName: String(describing: T.self))
-    fileprivate let interface: CloudKitInterface
+    fileprivate let interface: InterfaceType
     
     //TODO: Initiliazer can fail, handle with throw or optional
-    public init(store: S, interface: CloudKitInterface, recordZoneErrorBlock: ((_ error: Error) -> ())?) {
+    public init(store: S, interface: InterfaceType, recordZoneErrorBlock: ((_ error: Error) -> ())?) {
         
         self.privateDatabase = interface.privateDatabase
         self.interface = interface
@@ -120,7 +120,9 @@ open class Radon<S: RadonStore, T:Syncable> {
     }
     
     public convenience init(store: S, cloudKitIdentifier: String) {
-        self.init(store: store, interface: RadonCloudKit(cloudKitIdentifier: cloudKitIdentifier, recordZoneName: String(describing: T.self), syncableName: String(describing: T.self)), recordZoneErrorBlock: nil)
+        //TODO: fix cast
+        let interface: InterfaceType = RadonCloudKit(cloudKitIdentifier: cloudKitIdentifier, recordZoneName: String(describing: T.self), syncableName: String(describing: T.self)) as! InterfaceType
+        self.init(store: store, interface: interface, recordZoneErrorBlock: nil)
     }
     
     
@@ -306,7 +308,7 @@ open class Radon<S: RadonStore, T:Syncable> {
         }
     }
     
-    fileprivate func recordForObject(_ object: S.T, success: @escaping (_ record: CKRecord) -> (), failure: @escaping (_ error: Error) -> ()) {
+    fileprivate func recordForObject(_ object: S.T, success: @escaping (_ record: InterfaceType.RecordType) -> (), failure: @escaping (_ error: Error) -> ()) {
         self.queue.async { () -> Void in
             guard let recordName = self.store.recordNameForObject(object) else {
                 self.store.setSyncStatus(false, forObject: object)

@@ -13,11 +13,14 @@ public protocol Record {
     var recordID: CKRecordID { get }
     var modificationDate: Date? { get }
     func valuesDictionaryForKeys(_ keys: [String], syncableType: Syncable.Type) -> [String:Any]
+    func updateWithDictionary(_ dictionary: [String:Any])
 }
 
 extension CKRecord: Record {}
 
 public protocol CloudKitInterface {
+    
+    associatedtype RecordType: Record
     
     var container: CKContainer {get}
     var privateDatabase: CKDatabase {get}
@@ -26,9 +29,9 @@ public protocol CloudKitInterface {
     
     func createRecord(withDictionary dictionary: [String : Any], onQueue queue: DispatchQueue, createRecordCompletionBlock: @escaping ((_ recordName:String?,_ error:Error?) -> Void))
     
-    func fetchRecord(_ recordName: String, onQueue queue: DispatchQueue, fetchRecordsCompletionBlock: @escaping ((CKRecord?, Error?) -> Void))
+    func fetchRecord(_ recordName: String, onQueue queue: DispatchQueue, fetchRecordsCompletionBlock: @escaping ((RecordType?, Error?) -> Void))
     
-    func modifyRecord(_ record: CKRecord, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping (([CKRecord]?, [CKRecordID]?, Error?) -> Void))
+    func modifyRecord(_ record: RecordType, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping (([CKRecord]?, [CKRecordID]?, Error?) -> Void))
     
     func deleteRecordWithID(_ recordID: CKRecordID, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping ((Error?) -> Void))
     
@@ -38,6 +41,8 @@ public protocol CloudKitInterface {
 }
 
 open class RadonCloudKit: CloudKitInterface {
+    
+    public typealias RecordType = CKRecord
     
     open let container: CKContainer
     open let privateDatabase: CKDatabase
@@ -67,7 +72,7 @@ open class RadonCloudKit: CloudKitInterface {
         createOperation.start()
     }
     
-    open func fetchRecord(_ recordName: String, onQueue queue: DispatchQueue, fetchRecordsCompletionBlock: @escaping ((CKRecord?, Error?) -> Void)) {
+    open func fetchRecord(_ recordName: String, onQueue queue: DispatchQueue, fetchRecordsCompletionBlock: @escaping ((RecordType?, Error?) -> Void)) {
         let recordID = CKRecordID(recordName: recordName, zoneID: self.syncableRecordZone.zoneID)
         let fetchOperation = CKFetchRecordsOperation(recordIDs: [recordID])
         fetchOperation.database = self.privateDatabase
@@ -82,7 +87,7 @@ open class RadonCloudKit: CloudKitInterface {
         fetchOperation.start()
     }
     
-    open func modifyRecord(_ record: CKRecord, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping (([CKRecord]?, [CKRecordID]?, Error?) -> Void)) {
+    open func modifyRecord(_ record: RecordType, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping (([CKRecord]?, [CKRecordID]?, Error?) -> Void)) {
         let modifyOperation = CKModifyRecordsOperation(recordsToSave: [record], recordIDsToDelete: nil)
         modifyOperation.database = self.privateDatabase
         modifyOperation.savePolicy = .changedKeys

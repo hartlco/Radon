@@ -16,7 +16,7 @@ extension CKRecord {
         self.updateWithDictionary(dictionary)
     }
     
-    internal func updateWithDictionary(_ dictionary: [String:Any]) {
+    public func updateWithDictionary(_ dictionary: [String:Any]) {
         for (key, value) in dictionary {
             if let value = value as? CKRecordValue {
                 self.setObject(value, forKey: key)
