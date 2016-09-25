@@ -30,6 +30,18 @@ class MockRecord: Record {
         ]
     }
     
+    func updateWithDictionary(_ dictionary: [String : Any]) {
+        guard let string = dictionary["string"] as? String,
+            let int = dictionary["int"] as? Int,
+            let double = dictionary["double"] as? Double else {
+                assert(true)
+             return
+        }
+        self.string = string
+        self.int = int
+        self.double = double
+    }
+    
     init(recordID: CKRecordID, modificationDate: Date, string: String, int: Int, double: Double) {
         self.recordID = recordID
         self.modificationDate = modificationDate

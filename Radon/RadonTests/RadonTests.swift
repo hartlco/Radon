@@ -13,13 +13,13 @@ import CloudKit
 class RadonTests: XCTestCase {
     
     var mockInterface: MockCloudKitInterface!
-    var radon: Radon<ExampleRadonStore, TestClass>!
+    var radon: Radon<ExampleRadonStore, TestClass, MockCloudKitInterface>!
     var store: ExampleRadonStore!
     
     override func setUp() {
         store = ExampleRadonStore()
         mockInterface = MockCloudKitInterface()
-        radon = Radon<ExampleRadonStore, TestClass>(store: store, interface: mockInterface, recordZoneErrorBlock: nil)
+        radon = Radon<ExampleRadonStore, TestClass, MockCloudKitInterface>(store: store, interface: mockInterface, recordZoneErrorBlock: nil)
         radon.defaultsStoreable = MockDefaultsStoreable()
     }
     
@@ -50,7 +50,7 @@ class RadonTests: XCTestCase {
     func testFullInit() {
         
         mockInterface.failsSaveRecordZone = true
-        _ = Radon<ExampleRadonStore, TestClass>(store: ExampleRadonStore(), interface: mockInterface) { (error) in
+        _ = Radon<ExampleRadonStore, TestClass, MockCloudKitInterface>(store: ExampleRadonStore(), interface: mockInterface) { (error) in
             XCTAssert(error != nil)
         }
         
