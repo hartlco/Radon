@@ -53,6 +53,8 @@ class MockRecord: Record {
 
 class MockCloudKitInterface: CloudKitInterface {
     
+    typealias RecordType = MockRecord
+    
     init() {
         self.container = CKContainer(identifier: "Mock")
         self.privateDatabase = self.container.publicCloudDatabase
@@ -88,7 +90,7 @@ class MockCloudKitInterface: CloudKitInterface {
         }
     }
     
-    func fetchRecord(_ recordName: String, onQueue queue: DispatchQueue, fetchRecordsCompletionBlock: @escaping ((CKRecord?, Error?) -> Void)) {
+    func fetchRecord(_ recordName: String, onQueue queue: DispatchQueue, fetchRecordsCompletionBlock: @escaping ((MockRecord?, Error?) -> Void)) {
         
         let mockStore = ExampleRadonStore()
         let object = TestClass(string: "Mock", int: 1, double: 2)
@@ -96,14 +98,13 @@ class MockCloudKitInterface: CloudKitInterface {
         if failsFetchRecord {
             fetchRecordsCompletionBlock(nil, MockError())
         } else {
-            let record = CKRecord(recordType: "Mock", recordID: CKRecordID(recordName: "Mock"))
+            let record = MockRecord(recordID: CKRecordID(recordName: "Mock"), modificationDate: Date(),  string: "Mock", int: 123, double: 123)
             record.updateWithDictionary(mockStore.allPropertiesForObject(object))
             fetchRecordsCompletionBlock(record, nil)
         }
     }
     
-    func modifyRecord(_ record: CKRecord, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping (([CKRecord]?, [CKRecordID]?, Error?) -> Void)) {
-        
+    func modifyRecord(_ record: MockRecord, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: (@escaping ([MockRecord]?, [String]?, Error?) -> Void)) {
         if failsModifyRecord {
             modifyRecordsCompletionBlock(nil, nil, MockError())
         } else {

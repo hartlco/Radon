@@ -31,7 +31,7 @@ public protocol CloudKitInterface {
     
     func fetchRecord(_ recordName: String, onQueue queue: DispatchQueue, fetchRecordsCompletionBlock: @escaping ((RecordType?, Error?) -> Void))
     
-    func modifyRecord(_ record: RecordType, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping (([CKRecord]?, [CKRecordID]?, Error?) -> Void))
+    func modifyRecord(_ record: RecordType, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping (([RecordType]?, [String]?, Error?) -> Void))
     
     func deleteRecordWithID(_ recordID: CKRecordID, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping ((Error?) -> Void))
     
@@ -87,11 +87,14 @@ open class RadonCloudKit: CloudKitInterface {
         fetchOperation.start()
     }
     
-    open func modifyRecord(_ record: RecordType, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping (([CKRecord]?, [CKRecordID]?, Error?) -> Void)) {
+    open func modifyRecord(_ record: RecordType, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping (([RecordType]?, [String]?, Error?) -> Void)) {
         let modifyOperation = CKModifyRecordsOperation(recordsToSave: [record], recordIDsToDelete: nil)
         modifyOperation.database = self.privateDatabase
         modifyOperation.savePolicy = .changedKeys
-        modifyOperation.rad_setModifyRecordsCompletionBlock(onQueue: queue, modifyRecordsCompletionBlock: modifyRecordsCompletionBlock)
+        modifyOperation.rad_setModifyRecordsCompletionBlock(onQueue: queue) { (records, recordIDs, error) in
+            let recordNames = recordIDs?.map { return $0.recordName }
+            modifyRecordsCompletionBlock(records, recordNames, error)
+        }
         modifyOperation.start()
     }
     
