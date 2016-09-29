@@ -336,8 +336,7 @@ open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudKitInterface> {
     }
     
     fileprivate func deleteRecord(_ recordName: String, completion: @escaping CompletionBlock) {
-        let recordID = CKRecordID(recordName: recordName, zoneID: self.syncableRecordZone.zoneID)
-        interface.deleteRecordWithID(recordID, onQueue: self.queue) { (error) in
+        interface.deleteRecordWithName(recordName, onQueue: self.queue) { (error) in
             completion(error)
         }
     }

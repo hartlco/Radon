@@ -33,7 +33,7 @@ public protocol CloudKitInterface {
     
     func modifyRecord(_ record: RecordType, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping (([RecordType]?, [String]?, Error?) -> Void))
     
-    func deleteRecordWithID(_ recordID: CKRecordID, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping ((Error?) -> Void))
+    func deleteRecordWithName(_ recordName: String, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping ((Error?) -> Void))
     
     func fetchRecordChanges(onQueue queue: DispatchQueue, previousServerChangeToken: CKServerChangeToken?, recordChangeBlock: @escaping ((Record) -> Void), recordWithIDWasDeletedBlock: @escaping ((CKRecordID, String) -> Void), fetchRecordChangesCompletionBlock: @escaping ((CKRecordZoneID, CKServerChangeToken?, Data?, Bool, Error?) -> Void))
     
@@ -98,7 +98,8 @@ open class RadonCloudKit: CloudKitInterface {
         modifyOperation.start()
     }
     
-    open func deleteRecordWithID(_ recordID: CKRecordID, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping ((Error?) -> Void)) {
+    open func deleteRecordWithName(_ recordName: String, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping ((Error?) -> Void)) {
+        let recordID = CKRecordID(recordName: recordName, zoneID: self.syncableRecordZone.zoneID)
         let deleteOperation = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: [recordID])
         deleteOperation.database = self.privateDatabase
         deleteOperation.rad_setModifyRecordsCompletionBlock(onQueue: queue) {records, deletedRecordIDs, error in

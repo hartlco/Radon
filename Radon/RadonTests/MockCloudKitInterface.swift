@@ -112,7 +112,7 @@ class MockCloudKitInterface: CloudKitInterface {
         }
     }
     
-    func deleteRecordWithID(_ recordID: CKRecordID, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping ((Error?) -> Void)) {
+    func deleteRecordWithName(_ recordName: String, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping ((Error?) -> Void)) {
         if failsDeleteRecord {
             modifyRecordsCompletionBlock(MockError())
         } else {
