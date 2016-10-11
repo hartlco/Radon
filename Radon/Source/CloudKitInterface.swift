@@ -37,7 +37,7 @@ public protocol CloudKitInterface {
     
     func fetchRecordChanges(onQueue queue: DispatchQueue, previousServerChangeToken: CKServerChangeToken?, recordChangeBlock: @escaping ((Record) -> Void), recordWithIDWasDeletedBlock: @escaping ((CKRecordID, String) -> Void), fetchRecordChangesCompletionBlock: @escaping ((CKRecordZoneID, CKServerChangeToken?, Data?, Bool, Error?) -> Void))
     
-    func fetchUserRecordIDWithCompletionHandler(_ completionHandler: @escaping (CKRecordID?, Error?) -> Void)
+    func fetchUserRecordNameWithCompletionHandler(_ completionHandler: @escaping (String?, Error?) -> Void)
 }
 
 open class RadonCloudKit: CloudKitInterface {
@@ -128,8 +128,10 @@ open class RadonCloudKit: CloudKitInterface {
         
     }
     
-    public func fetchUserRecordIDWithCompletionHandler(_ completionHandler: @escaping (CKRecordID?, Error?) -> Void) {
-        self.container.fetchUserRecordID(completionHandler: completionHandler)
+    public func fetchUserRecordNameWithCompletionHandler(_ completionHandler: @escaping (String?, Error?) -> Void) {
+        self.container.fetchUserRecordID { (recordID, error) in
+            completionHandler(recordID?.recordName, error)
+        }
     }
 }
 

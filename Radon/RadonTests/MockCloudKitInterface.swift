@@ -145,13 +145,11 @@ class MockCloudKitInterface: CloudKitInterface {
         fetchRecordChangesCompletionBlock(zoneID,nil, nil, false, nil)
     }
     
-    func fetchUserRecordIDWithCompletionHandler(_ completionHandler: @escaping (CKRecordID?, Error?) -> Void) {
+    func fetchUserRecordNameWithCompletionHandler(_ completionHandler: @escaping (String?, Error?) -> Void) {
         if fetchSameUserRecord {
-            let recordID = CKRecordID(recordName: "Mock")
-            completionHandler(recordID, nil)
+            completionHandler("Mock", nil)
         } else {
-            let recordID = CKRecordID(recordName: String(arc4random()))
-            completionHandler(recordID, nil)
+            completionHandler(String(arc4random()), nil)
         }
     }
     

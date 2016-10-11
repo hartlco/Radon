@@ -194,17 +194,17 @@ open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudKitInterface> {
     }
     
     open func checkIfiCloudUserChanged(_ success: @escaping (_ userStatus: RadoniCloudUserState) -> ()) {
-        self.interface.fetchUserRecordIDWithCompletionHandler { (recordID, error) in
+        self.interface.fetchUserRecordNameWithCompletionHandler { (recordName, error) in
             guard let currentUserID = self.loadUserRecordName() else {
-                self.saveUserRecordName(recordID?.recordName)
+                self.saveUserRecordName(recordName)
                 success(.firstSync)
                 return
             }
             
-            if let recordID = recordID?.recordName , recordID == currentUserID {
+            if let recordID = recordName , recordID == currentUserID {
                 success(.alreadySynced)
             } else {
-                self.saveUserRecordName(recordID?.recordName)
+                self.saveUserRecordName(recordName)
                 success(.changed)
             }
         }
