@@ -101,7 +101,6 @@ open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudKitInterface> {
     
     fileprivate let store: S
     fileprivate let syncableName = String(describing: T.self)
-    fileprivate let syncableRecordZone = CKRecordZone(zoneName: String(describing: T.self))
     fileprivate let interface: InterfaceType
     
     //TODO: Initiliazer can fail, handle with throw or optional
