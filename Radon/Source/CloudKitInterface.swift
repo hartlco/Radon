@@ -16,16 +16,20 @@ public protocol Record {
     func updateWithDictionary(_ dictionary: [String:Any])
 }
 
+public protocol ServerChangeToken { }
+
+extension CKServerChangeToken: ServerChangeToken { }
+
 extension CKRecord: Record {}
 
 public protocol CloudKitInterface {
     
     associatedtype RecordType: Record
+    associatedtype ChangeToken: ServerChangeToken
     
-    var container: CKContainer {get}
     var privateDatabase: CKDatabase {get}
     
-    func saveRecordZone(_ zone: CKRecordZone, completionHandler: (CKRecordZone?, Error?) -> Void)
+    func setup(completion: (Error?) -> Void)
     
     func createRecord(withDictionary dictionary: [String : Any], onQueue queue: DispatchQueue, createRecordCompletionBlock: @escaping ((_ recordName:String?,_ error:Error?) -> Void))
     
@@ -43,6 +47,7 @@ public protocol CloudKitInterface {
 open class RadonCloudKit: CloudKitInterface {
     
     public typealias RecordType = CKRecord
+    public typealias ChangeToken = CKServerChangeToken
     
     open let container: CKContainer
     open let privateDatabase: CKDatabase
@@ -56,7 +61,7 @@ open class RadonCloudKit: CloudKitInterface {
         self.syncableName = syncableName
     }
     
-    open func saveRecordZone(_ zone: CKRecordZone, completionHandler: (CKRecordZone?, Error?) -> Void) {
+    public func setup(completion: (Error?) -> Void) {
         privateDatabase.save(syncableRecordZone) { (zone, error) -> Void in
             print("CloudKit error: \(error)")
         }

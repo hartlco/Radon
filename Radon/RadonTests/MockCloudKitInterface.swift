@@ -73,11 +73,11 @@ class MockCloudKitInterface: CloudKitInterface {
     var recordIDtoDeleteInSync: CKRecordID? = nil
     var fetchSameUserRecord = false
     
-    func saveRecordZone(_ zone: CKRecordZone, completionHandler: (CKRecordZone?, Error?) -> Void) {
+    func setup(completion: (Error?) -> Void) {
         if failsSaveRecordZone {
-            completionHandler(nil, MockError())
+            completion(MockError())
         } else {
-            completionHandler(CKRecordZone(zoneName: "Mock"), nil)
+            completion(nil)
         }
     }
     

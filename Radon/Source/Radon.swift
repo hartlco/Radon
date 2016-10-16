@@ -111,7 +111,7 @@ open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudKitInterface> {
         self.privateDatabase = interface.privateDatabase
         self.interface = interface
         
-        interface.saveRecordZone(syncableRecordZone) { (zone, error) -> Void in
+        interface.setup { (error) in
             if let error = error { recordZoneErrorBlock?(error) }
         }
         
