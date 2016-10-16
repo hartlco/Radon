@@ -27,8 +27,6 @@ public protocol CloudKitInterface {
     associatedtype RecordType: Record
     associatedtype ChangeToken: ServerChangeToken
     
-    var privateDatabase: CKDatabase {get}
-    
     func setup(completion: (Error?) -> Void)
     
     func createRecord(withDictionary dictionary: [String : Any], onQueue queue: DispatchQueue, createRecordCompletionBlock: @escaping ((_ recordName:String?,_ error:Error?) -> Void))
@@ -65,6 +63,8 @@ open class RadonCloudKit: CloudKitInterface {
         privateDatabase.save(syncableRecordZone) { (zone, error) -> Void in
             print("CloudKit error: \(error)")
         }
+        
+        subscribeToItemUpdates()
     }
     
     public func createRecord(withDictionary dictionary: [String : Any], onQueue queue: DispatchQueue, createRecordCompletionBlock: (@escaping (String?, Error?) -> Void)) {
@@ -136,6 +136,29 @@ open class RadonCloudKit: CloudKitInterface {
     public func fetchUserRecordNameWithCompletionHandler(_ completionHandler: @escaping (String?, Error?) -> Void) {
         self.container.fetchUserRecordID { (recordID, error) in
             completionHandler(recordID?.recordName, error)
+        }
+    }
+    
+    // MARK: - Private notification handling methods
+    
+    fileprivate func notificationInfo() -> CKNotificationInfo {
+        let notificationInfo = CKNotificationInfo()
+        notificationInfo.shouldBadge = false
+        notificationInfo.shouldSendContentAvailable = true
+        return notificationInfo
+    }
+    
+    fileprivate func subscribeToItemUpdates() {
+        self.saveSubscriptionWithIdent("create", options: .firesOnRecordCreation)
+        self.saveSubscriptionWithIdent("update", options: .firesOnRecordUpdate)
+        self.saveSubscriptionWithIdent("delete", options: .firesOnRecordDeletion)
+    }
+    
+    fileprivate func saveSubscriptionWithIdent(_ ident: String, options: CKQuerySubscriptionOptions) {
+        let subscription = CKQuerySubscription(recordType: syncableName, predicate: NSPredicate(value: true), subscriptionID: ident, options: options)
+        subscription.notificationInfo = self.notificationInfo();
+        self.privateDatabase.save(subscription) { (subscription, error) -> Void in
+            //TODO: handle error
         }
     }
 }

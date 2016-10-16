@@ -99,7 +99,6 @@ open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudKitInterface> {
     
     open fileprivate(set) var isSyncing = false
     
-    fileprivate let privateDatabase: CKDatabase
     fileprivate let store: S
     fileprivate let syncableName = String(describing: T.self)
     fileprivate let syncableRecordZone = CKRecordZone(zoneName: String(describing: T.self))
@@ -108,7 +107,6 @@ open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudKitInterface> {
     //TODO: Initiliazer can fail, handle with throw or optional
     public init(store: S, interface: InterfaceType, recordZoneErrorBlock: ((_ error: Error) -> ())?) {
         
-        self.privateDatabase = interface.privateDatabase
         self.interface = interface
         
         interface.setup { (error) in
@@ -116,7 +114,6 @@ open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudKitInterface> {
         }
         
         self.store = store
-        self.subscribeToItemUpdates()
     }
     
     public convenience init(store: S, cloudKitIdentifier: String) {
@@ -376,29 +373,6 @@ open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudKitInterface> {
                 self.externDeletionBlock?(recordID.recordName)
             }
             return
-        }
-    }
-    
-    // MARK: - Private notification handling methods
-    
-    fileprivate func notificationInfo() -> CKNotificationInfo {
-        let notificationInfo = CKNotificationInfo()
-        notificationInfo.shouldBadge = false
-        notificationInfo.shouldSendContentAvailable = true
-        return notificationInfo
-    }
-    
-    fileprivate func subscribeToItemUpdates() {
-        self.saveSubscriptionWithIdent("create", options: .firesOnRecordCreation)
-        self.saveSubscriptionWithIdent("update", options: .firesOnRecordUpdate)
-        self.saveSubscriptionWithIdent("delete", options: .firesOnRecordDeletion)
-    }
-    
-    fileprivate func saveSubscriptionWithIdent(_ ident: String, options: CKQuerySubscriptionOptions) {
-        let subscription = CKQuerySubscription(recordType: syncableName, predicate: NSPredicate(value: true), subscriptionID: ident, options: options)
-        subscription.notificationInfo = self.notificationInfo();
-        self.privateDatabase.save(subscription) { (subscription, error) -> Void in
-            //TODO: handle error
         }
     }
     
