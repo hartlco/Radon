@@ -51,9 +51,12 @@ class MockRecord: Record {
     }
 }
 
+struct MockServerChangeToken: ServerChangeToken { }
+
 class MockCloudKitInterface: CloudKitInterface {
     
     typealias RecordType = MockRecord
+    typealias ChangeToken = MockServerChangeToken 
     
     init() {
         self.container = CKContainer(identifier: "Mock")
