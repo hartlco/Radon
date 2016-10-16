@@ -292,8 +292,7 @@ class RadonTests: XCTestCase {
     func testSyncRecordDeleted() {
         let testObject = TestClass(string: "hi", int: 1, double: 1)
         testObject.internRecordID = "Mock"
-        let recordID = CKRecordID(recordName: "Mock")
-        mockInterface.recordIDtoDeleteInSync = recordID
+        mockInterface.recordNametoDeleteInSync = "Mock"
         store.addObject(testObject)
         let expectation = self.expectation(description: "Delete object from sync")
         XCTAssert(store.objectWithIdentifier("Mock") != nil)
@@ -308,8 +307,7 @@ class RadonTests: XCTestCase {
     }
     
     func testSyncRecordDeleteNotFound() {
-        let recordID = CKRecordID(recordName: "Mock")
-        mockInterface.recordIDtoDeleteInSync = recordID
+        mockInterface.recordNametoDeleteInSync = "Mock"
         let expectation = self.expectation(description: "Delete object from sync")
         XCTAssert(store.objectWithIdentifier("Mock") == nil)
         radon.sync({ (error) in
