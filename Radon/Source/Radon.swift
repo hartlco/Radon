@@ -77,7 +77,7 @@ open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudKitInterface> {
     open var defaultsStoreable: DefaultsStoreable = UserDefaults.standard
     
     /// The token from the previous sync operation. It is used to determine the changes from the server since the last sync. If all data from the server should the synced, nil out this property. The token is stored in the standard `NSUserDefaults` with the key `RadonToken`.
-    open var syncToken: CKServerChangeToken? {
+    open var syncToken: ServerChangeToken? {
         get {
             guard let tokenData = defaultsStoreable.loadObjectForKey(RadonTokenConstant) as? Data,
                 let token = NSKeyedUnarchiver.unarchiveObject(with: tokenData) as? CKServerChangeToken else  {
@@ -259,17 +259,27 @@ open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudKitInterface> {
     
     // MARK: - Private methods
     
-    fileprivate func syncWithToken(_ token: CKServerChangeToken?, errorBlock: @escaping ErrorBlock, completion: @escaping CompletionBlock) {
+    fileprivate func syncWithToken(_ token: ServerChangeToken?, errorBlock: @escaping ErrorBlock, completion: @escaping CompletionBlock) {
         isSyncing = true
+        
+        self.interface.fetchRecordChanges(onQueue: queue, previousServerChangeToken: token, recordChangeBlock: { (record) in
+            
+            }, recordWithNameWasDeletedBlock: { (deletedRecordName) in
+                
+            }) { (changeToken, moreComing, Error) in
+                
+        }
+        
+        
         
         self.interface.fetchRecordChanges(onQueue: self.queue, previousServerChangeToken: token, recordChangeBlock: { [weak self] (record) in
             self?.handleRecordChangeInSync(record)
-        }, recordWithIDWasDeletedBlock: { [weak self] recordID, String in
-            guard let offlineObject = self?.store.objectWithIdentifier(recordID.recordName) else { return }
-            let recordName = recordID.recordName
+        }, recordWithNameWasDeletedBlock: { [weak self] recordName in
+            guard let offlineObject = self?.store.objectWithIdentifier(recordName) else { return }
+            let recordName = recordName
             self?.store.deleteObject(offlineObject)
             self?.externDeletionBlock?(recordName)
-        }, fetchRecordChangesCompletionBlock: { [weak self] (zoneID,token, data, moreComing, error) in
+        }, fetchRecordChangesCompletionBlock: { [weak self] (token, moreComing, error) in
             self?.createOrUpdateUnsyncedObjectsInSync(completion: { errors in
                 //TODO: handle errors array
                 
