@@ -79,8 +79,9 @@ open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudKitInterface> {
     /// The token from the previous sync operation. It is used to determine the changes from the server since the last sync. If all data from the server should the synced, nil out this property. The token is stored in the standard `NSUserDefaults` with the key `RadonToken`.
     open var syncToken: ServerChangeToken? {
         get {
+            //TODO: Test if token is correctly saved and loaded
             guard let tokenData = defaultsStoreable.loadObjectForKey(RadonTokenConstant) as? Data,
-                let token = NSKeyedUnarchiver.unarchiveObject(with: tokenData) as? CKServerChangeToken else  {
+                let token = NSKeyedUnarchiver.unarchiveObject(with: tokenData) as? ServerChangeToken else  {
                     return nil
             }
             return token
