@@ -187,7 +187,7 @@ open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudKitInterface> {
     
     open func handleQueryNotification(_ queryNotification: CKQueryNotification) {
         guard let recordID = queryNotification.recordID else { return }
-        self.handleQueryNotificationReason(queryNotification.queryNotificationReason, forRecordID: recordID)
+        self.handleQueryNotificationReason(queryNotification.queryNotificationReason, forRecordName: recordID.recordName)
     }
     
     open func checkIfiCloudUserChanged(_ success: @escaping (_ userStatus: RadoniCloudUserState) -> ()) {
@@ -357,30 +357,29 @@ open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudKitInterface> {
         self.externInsertBlock?(newObject)
     }
     
-    internal func handleQueryNotificationReason(_ reason: CKQueryNotificationReason, forRecordID recordID: CKRecordID) {
+    internal func handleQueryNotificationReason(_ reason: CKQueryNotificationReason, forRecordName recordName: String) {
         switch reason {
         case .recordCreated:
-            self.interface.fetchRecord(recordID.recordName, onQueue: self.queue, fetchRecordsCompletionBlock: { [weak self] (record, error) in
+            self.interface.fetchRecord(recordName, onQueue: self.queue, fetchRecordsCompletionBlock: { [weak self] (record, error) in
                 guard let record = record else { return }
                 self?.insertObject(fromRecord: record)
             })
             
             return
         case .recordUpdated:
-            self.interface.fetchRecord(recordID.recordName, onQueue: self.queue, fetchRecordsCompletionBlock: { [weak self] (record, error) in
-                guard let record = record else { return }
-                if  let syncable = self?.store.objectWithIdentifier(recordID.recordName) {
-                    let dictionary = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType:T.self)
-                    self?.store.updateObject(syncable, withDictionary: dictionary)
-                    self?.externUpdateBlock?(syncable)
-                }
+            self.interface.fetchRecord(recordName, onQueue: self.queue, fetchRecordsCompletionBlock: { [weak self] (record, error) in
+                guard let record = record,
+                let syncable = self?.store.objectWithIdentifier(recordName) else { return }
+                let dictionary = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType:T.self)
+                self?.store.updateObject(syncable, withDictionary: dictionary)
+                self?.externUpdateBlock?(syncable)
             })
             
             return
         case .recordDeleted:
-            if let syncable = self.store.objectWithIdentifier(recordID.recordName) {
+            if let syncable = self.store.objectWithIdentifier(recordName) {
                 self.store.deleteObject(syncable)
-                self.externDeletionBlock?(recordID.recordName)
+                self.externDeletionBlock?(recordName)
             }
             return
         }
