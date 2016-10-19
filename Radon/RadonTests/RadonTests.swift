@@ -197,8 +197,7 @@ class RadonTests: XCTestCase {
         testObject.internRecordID = "123"
         store.addObject(testObject)
         XCTAssert(store.objectWithIdentifier(testObject.internRecordID) != nil)
-        let recordID = CKRecordID(recordName: "123")
-        radon.handleQueryNotificationReason(.recordUpdated, forRecordID: recordID)
+        radon.handleQueryNotificationReason(.recordUpdated, forRecordName: "123")
         XCTAssert(testObject.string == "Mock")
     }
     
@@ -207,9 +206,8 @@ class RadonTests: XCTestCase {
         testObject.internRecordID = "123"
         store.addObject(testObject)
         XCTAssert(store.objectWithIdentifier(testObject.internRecordID) != nil)
-        let recordID = CKRecordID(recordName: "123")
         mockInterface.failsFetchRecord = true
-        radon.handleQueryNotificationReason(.recordUpdated, forRecordID: recordID)
+        radon.handleQueryNotificationReason(.recordUpdated, forRecordName: "123")
         XCTAssert(testObject.string == "hi")
     }
     
@@ -218,23 +216,20 @@ class RadonTests: XCTestCase {
         testObject.internRecordID = "123"
         store.addObject(testObject)
         XCTAssert(store.objectWithIdentifier(testObject.internRecordID) != nil)
-        let recordID = CKRecordID(recordName: "123")
-        radon.handleQueryNotificationReason(.recordDeleted, forRecordID: recordID)
+        radon.handleQueryNotificationReason(.recordDeleted, forRecordName: "123")
         XCTAssert(store.objectWithIdentifier(testObject.internRecordID) == nil)
     }
     
     func testHandleQueryNotificationReasonRecordCreated() {
         XCTAssert(store.objectWithIdentifier("Mock") == nil)
-        let recordID = CKRecordID(recordName: "Mock")
-        radon.handleQueryNotificationReason(.recordCreated, forRecordID: recordID)
+        radon.handleQueryNotificationReason(.recordCreated, forRecordName: "123")
         XCTAssert(store.objectWithIdentifier("Mock") != nil)
     }
     
     func testHandleQueryNotificationReasonRecordCreatedRecordNotFound() {
         XCTAssert(store.objectWithIdentifier("Mock") == nil)
         mockInterface.failsFetchRecord = true
-        let recordID = CKRecordID(recordName: "Mock")
-        radon.handleQueryNotificationReason(.recordCreated, forRecordID: recordID)
+        radon.handleQueryNotificationReason(.recordCreated, forRecordName: "123")
         XCTAssert(store.objectWithIdentifier("Mock") == nil)
     }
     
