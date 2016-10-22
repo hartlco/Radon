@@ -263,16 +263,6 @@ open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudKitInterface> {
     fileprivate func syncWithToken(_ token: ServerChangeToken?, errorBlock: @escaping ErrorBlock, completion: @escaping CompletionBlock) {
         isSyncing = true
         
-        self.interface.fetchRecordChanges(onQueue: queue, previousServerChangeToken: token, recordChangeBlock: { (record) in
-            
-            }, recordWithNameWasDeletedBlock: { (deletedRecordName) in
-                
-            }) { (changeToken, moreComing, Error) in
-                
-        }
-        
-        
-        
         self.interface.fetchRecordChanges(onQueue: self.queue, previousServerChangeToken: token, recordChangeBlock: { [weak self] (record) in
             self?.handleRecordChangeInSync(record)
         }, recordWithNameWasDeletedBlock: { [weak self] recordName in
