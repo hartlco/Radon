@@ -37,7 +37,7 @@ public protocol CloudKitInterface {
     
     func deleteRecordWithName(_ recordName: String, onQueue queue: DispatchQueue, modifyRecordsCompletionBlock: @escaping ((Error?) -> Void))
     
-    func fetchRecordChanges(onQueue queue: DispatchQueue, previousServerChangeToken: ServerChangeToken?, recordChangeBlock: @escaping ((Record) -> Void), recordWithNameWasDeletedBlock: @escaping ((String) -> Void), fetchRecordChangesCompletionBlock: @escaping ((ServerChangeToken?, Bool, Error?) -> Void))
+    func fetchRecordChanges(onQueue queue: DispatchQueue, previousServerChangeToken: ServerChangeToken?, recordChangeBlock: @escaping ((Record) -> Void), recordWithNameWasDeletedBlock: @escaping ((String) -> Void), fetchRecordChangesCompletionBlock: @escaping ((ServerChangeToken?, Bool, Error?, Bool) -> Void))
     
     func fetchUserRecordNameWithCompletionHandler(_ completionHandler: @escaping (String?, Error?) -> Void)
 }
@@ -114,7 +114,7 @@ open class RadonCloudKit: CloudKitInterface {
         deleteOperation.start()
     }
     
-    public func fetchRecordChanges(onQueue queue: DispatchQueue, previousServerChangeToken: ServerChangeToken?, recordChangeBlock: (@escaping (Record) -> Void), recordWithNameWasDeletedBlock: (@escaping (String) -> Void), fetchRecordChangesCompletionBlock: (@escaping (ServerChangeToken?, Bool, Error?) -> Void)) {
+    public func fetchRecordChanges(onQueue queue: DispatchQueue, previousServerChangeToken: ServerChangeToken?, recordChangeBlock: (@escaping (Record) -> Void), recordWithNameWasDeletedBlock: (@escaping (String) -> Void), fetchRecordChangesCompletionBlock: (@escaping (ServerChangeToken?, Bool, Error?, Bool) -> Void)) {
         
         let options = CKFetchRecordZoneChangesOptions()
         //TODO: make it nicer
@@ -131,7 +131,11 @@ open class RadonCloudKit: CloudKitInterface {
         }
         
         fetchRecordZoneChangesOperation.rad_setFetchRecordChangesCompletionBlock(onQueue: queue) { (zoneID, serverChangeToken, data, moreComing, error) in
-            fetchRecordChangesCompletionBlock(serverChangeToken, moreComing, error)
+            if let ckerror = error as? CKError , ckerror.code == CKError.changeTokenExpired {
+                fetchRecordChangesCompletionBlock(serverChangeToken, moreComing, error, true)
+            }
+            
+            fetchRecordChangesCompletionBlock(serverChangeToken, moreComing, error, false)
         }
         
         

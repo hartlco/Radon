@@ -73,6 +73,7 @@ class MockCloudKitInterface: CloudKitInterface {
     var failsDeleteRecord = false
     var syncRecordChangeHasNewObject = false
     var syncOlderObject = false
+    var syncNeedsFreshSync = false
     var recordNametoDeleteInSync: String? = nil
     var fetchSameUserRecord = false
     
@@ -124,7 +125,7 @@ class MockCloudKitInterface: CloudKitInterface {
     }
     
     
-    func fetchRecordChanges(onQueue queue: DispatchQueue, previousServerChangeToken: ServerChangeToken?, recordChangeBlock: @escaping ((Record) -> Void), recordWithNameWasDeletedBlock: @escaping ((String) -> Void), fetchRecordChangesCompletionBlock: @escaping ((ServerChangeToken?, Bool, Error?) -> Void)) {
+    func fetchRecordChanges(onQueue queue: DispatchQueue, previousServerChangeToken: ServerChangeToken?, recordChangeBlock: @escaping ((Record) -> Void), recordWithNameWasDeletedBlock: @escaping ((String) -> Void), fetchRecordChangesCompletionBlock: @escaping ((ServerChangeToken?, Bool, Error?, Bool) -> Void)) {
         
         if syncRecordChangeHasNewObject {
             
@@ -143,7 +144,7 @@ class MockCloudKitInterface: CloudKitInterface {
             recordWithNameWasDeletedBlock(recordNametoDeleteInSync)
         }
         
-        fetchRecordChangesCompletionBlock(nil, false, nil)
+        fetchRecordChangesCompletionBlock(nil, false, nil, syncNeedsFreshSync)
     }
     
     func fetchUserRecordNameWithCompletionHandler(_ completionHandler: @escaping (String?, Error?) -> Void) {

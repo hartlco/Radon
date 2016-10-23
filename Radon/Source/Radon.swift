@@ -270,12 +270,12 @@ open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudKitInterface> {
             let recordName = recordName
             self?.store.deleteObject(offlineObject)
             self?.externDeletionBlock?(recordName)
-        }, fetchRecordChangesCompletionBlock: { [weak self] (token, moreComing, error) in
+        }, fetchRecordChangesCompletionBlock: { [weak self] (token, moreComing, error, needsCleanSync) in
             self?.createOrUpdateUnsyncedObjectsInSync(completion: { errors in
                 //TODO: handle errors array
                 
                 self?.syncToken = token
-                if let ckerror = error as? CKError , ckerror.code == CKError.changeTokenExpired {
+                if needsCleanSync {
                     self?.syncToken = nil
                     //Delay execution for 3 seconds to not trigger execution limition of iCloud
                     self?.queue.asyncAfter(deadline: DispatchTime.now() + Double(Int64(3.0 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)) { () -> Void in
