@@ -10,7 +10,7 @@ import Foundation
 import CloudKit
 
 public protocol Record {
-    var recordID: CKRecordID { get }
+    var recordName: String { get }
     var modificationDate: Date? { get }
     func valuesDictionaryForKeys(_ keys: [String], syncableType: Syncable.Type) -> [String:Any]
     func updateWithDictionary(_ dictionary: [String:Any])
@@ -20,7 +20,13 @@ public protocol ServerChangeToken { }
 
 extension CKServerChangeToken: ServerChangeToken { }
 
-extension CKRecord: Record {}
+extension CKRecord: Record {
+    public var recordName: String {
+        get {
+            return recordID.recordName
+        }
+    }
+}
 
 public protocol CloudKitInterface {
     

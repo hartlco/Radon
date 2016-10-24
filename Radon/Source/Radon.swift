@@ -210,7 +210,7 @@ open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudKitInterface> {
     // MARK: - Internal methods for Unit tests
     
     internal func handleRecordChangeInSync(_ record: Record) {
-        if let offlineObject = self.store.objectWithIdentifier(record.recordID.recordName) {
+        if let offlineObject = self.store.objectWithIdentifier(record.recordName) {
             //TODO: Add optional conflict block to handle this situation
             if self.store.modificationDateForObject(offlineObject).isEarlierThan(record.modificationDate)  {
                 // Local object needs to be updated with server record
@@ -342,7 +342,7 @@ open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudKitInterface> {
         let dictionary = record.valuesDictionaryForKeys(T.propertyNamesToSync(), syncableType:T.self)
         let newObject = self.store.newObjectFromDictionary(dictionary)
         self.store.setModificationDate(record.modificationDate, forObject: newObject)
-        self.store.setRecordName(record.recordID.recordName, forObject: newObject)
+        self.store.setRecordName(record.recordName, forObject: newObject)
         self.store.setSyncStatus(true, forObject: newObject)
         self.externInsertBlock?(newObject)
     }
