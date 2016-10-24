@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import CloudKit
 @testable import Radon_iOS
 
 struct MockError: Error {
@@ -15,7 +14,7 @@ struct MockError: Error {
 }
 
 class MockRecord: Record {
-    var recordID: CKRecordID
+    var recordName: String
     var modificationDate: Date?
     
     var string:String
@@ -42,8 +41,8 @@ class MockRecord: Record {
         self.double = double
     }
     
-    init(recordID: CKRecordID, modificationDate: Date, string: String, int: Int, double: Double) {
-        self.recordID = recordID
+    init(recordName: String, modificationDate: Date, string: String, int: Int, double: Double) {
+        self.recordName = recordName
         self.modificationDate = modificationDate
         self.string = string
         self.int = int
@@ -57,14 +56,6 @@ class MockCloudKitInterface: CloudKitInterface {
     
     typealias RecordType = MockRecord
     typealias ChangeToken = MockServerChangeToken 
-    
-    init() {
-        self.container = CKContainer(identifier: "Mock")
-        self.privateDatabase = self.container.publicCloudDatabase
-    }
-    
-    var container: CKContainer
-    var privateDatabase: CKDatabase
     
     var failsSaveRecordZone = false
     var failsCreateRecord = false
@@ -102,7 +93,7 @@ class MockCloudKitInterface: CloudKitInterface {
         if failsFetchRecord {
             fetchRecordsCompletionBlock(nil, MockError())
         } else {
-            let record = MockRecord(recordID: CKRecordID(recordName: "Mock"), modificationDate: Date(),  string: "Mock", int: 123, double: 123)
+            let record = MockRecord(recordName: "Mock", modificationDate: Date(),  string: "Mock", int: 123, double: 123)
             record.updateWithDictionary(mockStore.allPropertiesForObject(object))
             fetchRecordsCompletionBlock(record, nil)
         }
@@ -136,7 +127,7 @@ class MockCloudKitInterface: CloudKitInterface {
                 date = Date()
             }
             
-            let record = MockRecord(recordID: CKRecordID(recordName: "Mock"), modificationDate: date, string: "ServerUpdated", int: 4, double: 5)
+            let record = MockRecord(recordName: "Mock", modificationDate: date, string: "ServerUpdated", int: 4, double: 5)
             recordChangeBlock(record)
         }
         
