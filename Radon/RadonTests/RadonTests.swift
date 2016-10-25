@@ -7,7 +7,6 @@
 //
 
 import XCTest
-import CloudKit
 @testable import Radon_iOS
 
 class RadonTests: XCTestCase {
