@@ -196,7 +196,7 @@ class RadonTests: XCTestCase {
         testObject.internRecordID = "123"
         store.addObject(testObject)
         XCTAssert(store.objectWithIdentifier(testObject.internRecordID) != nil)
-        radon.handleQueryNotificationReason(.recordUpdated, forRecordName: "123")
+        radon.handleQueryNotificationReason(.recordUpdated(recordName: "123"))
         XCTAssert(testObject.string == "Mock")
     }
     
@@ -206,7 +206,7 @@ class RadonTests: XCTestCase {
         store.addObject(testObject)
         XCTAssert(store.objectWithIdentifier(testObject.internRecordID) != nil)
         mockInterface.failsFetchRecord = true
-        radon.handleQueryNotificationReason(.recordUpdated, forRecordName: "123")
+        radon.handleQueryNotificationReason(.recordUpdated(recordName: "123"))
         XCTAssert(testObject.string == "hi")
     }
     
@@ -215,20 +215,20 @@ class RadonTests: XCTestCase {
         testObject.internRecordID = "123"
         store.addObject(testObject)
         XCTAssert(store.objectWithIdentifier(testObject.internRecordID) != nil)
-        radon.handleQueryNotificationReason(.recordDeleted, forRecordName: "123")
+        radon.handleQueryNotificationReason(.recordDeleted(recordName: "123"))
         XCTAssert(store.objectWithIdentifier(testObject.internRecordID) == nil)
     }
     
     func testHandleQueryNotificationReasonRecordCreated() {
         XCTAssert(store.objectWithIdentifier("Mock") == nil)
-        radon.handleQueryNotificationReason(.recordCreated, forRecordName: "123")
+        radon.handleQueryNotificationReason(.recordCreated(recordName: "123"))
         XCTAssert(store.objectWithIdentifier("Mock") != nil)
     }
     
     func testHandleQueryNotificationReasonRecordCreatedRecordNotFound() {
         XCTAssert(store.objectWithIdentifier("Mock") == nil)
         mockInterface.failsFetchRecord = true
-        radon.handleQueryNotificationReason(.recordCreated, forRecordName: "123")
+        radon.handleQueryNotificationReason(.recordCreated(recordName: "123"))
         XCTAssert(store.objectWithIdentifier("Mock") == nil)
     }
     

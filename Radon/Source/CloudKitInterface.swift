@@ -125,6 +125,20 @@ open class RadonCloudKit: CloudInterface {
         }
     }
     
+    public func queryNotificationReason(for userInfo: [AnyHashable : Any]) -> QueryNotificationReason {
+        //TODO: handle possible crash
+        let notification =  CKQueryNotification(fromRemoteNotificationDictionary: userInfo as! [String: NSObject])
+        guard let recordName = notification.recordID?.recordName else { return .invalid }
+        switch notification.queryNotificationReason {
+        case .recordCreated:
+            return .recordCreated(recordName: recordName)
+        case .recordUpdated:
+            return .recordUpdated(recordName: recordName)
+        case .recordDeleted:
+            return .recordDeleted(recordName: notification.recordID?.recordName)
+        }
+    }
+    
     // MARK: - Private notification handling methods
     
     fileprivate func notificationInfo() -> CKNotificationInfo {

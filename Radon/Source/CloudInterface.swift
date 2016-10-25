@@ -8,6 +8,13 @@
 
 import Foundation
 
+public enum QueryNotificationReason {
+    case recordCreated(recordName: String)
+    case recordUpdated(recordName: String)
+    case recordDeleted(recordName: String?)
+    case invalid
+}
+
 public protocol Record {
     var recordName: String { get }
     var modificationDate: Date? { get }
@@ -35,5 +42,7 @@ public protocol CloudInterface {
     func fetchRecordChanges(onQueue queue: DispatchQueue, previousServerChangeToken: ServerChangeToken?, recordChangeBlock: @escaping ((Record) -> Void), recordWithNameWasDeletedBlock: @escaping ((String) -> Void), fetchRecordChangesCompletionBlock: @escaping ((ServerChangeToken?, Bool, Error?, Bool) -> Void))
     
     func fetchUserRecordNameWithCompletionHandler(_ completionHandler: @escaping (String?, Error?) -> Void)
+    
+    func queryNotificationReason(for userInfo: [AnyHashable : Any]) -> QueryNotificationReason
 }
 

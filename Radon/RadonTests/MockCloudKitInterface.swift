@@ -146,4 +146,9 @@ class MockCloudKitInterface: CloudInterface {
         }
     }
     
+    func queryNotificationReason(for userInfo: [AnyHashable : Any]) -> QueryNotificationReason {
+        //TODO: add tests
+        return .recordCreated(recordName: "Mock")
+    }
+    
 }

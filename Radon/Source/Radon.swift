@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import CloudKit
 
 private let RadonTokenConstant = "RadonToken"
 private let RadoniCloudUserConstant = "RadoniCloudUserConstant"
@@ -185,9 +184,9 @@ open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudInterface> {
         }
     }
     
-    open func handleQueryNotification(_ queryNotification: CKQueryNotification) {
-        guard let recordID = queryNotification.recordID else { return }
-        self.handleQueryNotificationReason(queryNotification.queryNotificationReason, forRecordName: recordID.recordName)
+    open func handleQueryNotification(_ queryNotification: [AnyHashable : Any]) {
+        let queryReason = interface.queryNotificationReason(for: queryNotification)
+        handleQueryNotificationReason(queryReason)
     }
     
     open func checkIfiCloudUserChanged(_ success: @escaping (_ userStatus: RadoniCloudUserState) -> ()) {
@@ -347,16 +346,16 @@ open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudInterface> {
         self.externInsertBlock?(newObject)
     }
     
-    internal func handleQueryNotificationReason(_ reason: CKQueryNotificationReason, forRecordName recordName: String) {
+    internal func handleQueryNotificationReason(_ reason: QueryNotificationReason) {
         switch reason {
-        case .recordCreated:
+        case .recordCreated(let recordName):
             self.interface.fetchRecord(recordName, onQueue: self.queue, fetchRecordsCompletionBlock: { [weak self] (record, error) in
                 guard let record = record else { return }
                 self?.insertObject(fromRecord: record)
             })
             
             return
-        case .recordUpdated:
+        case .recordUpdated(let recordName):
             self.interface.fetchRecord(recordName, onQueue: self.queue, fetchRecordsCompletionBlock: { [weak self] (record, error) in
                 guard let record = record,
                 let syncable = self?.store.objectWithIdentifier(recordName) else { return }
@@ -366,11 +365,13 @@ open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudInterface> {
             })
             
             return
-        case .recordDeleted:
+        case .recordDeleted(let recordName):
             if let syncable = self.store.objectWithIdentifier(recordName) {
                 self.store.deleteObject(syncable)
                 self.externDeletionBlock?(recordName)
             }
+            return
+        case .invalid:
             return
         }
     }
