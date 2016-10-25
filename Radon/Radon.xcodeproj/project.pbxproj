@@ -10,6 +10,8 @@
 		4B25B4BF1CDD1CAF00897DCF /* RadonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B25B4BE1CDD1CAF00897DCF /* RadonTests.swift */; };
 		4B25B4C71CDD1CC900897DCF /* MockCloudKitInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B25B4C61CDD1CC900897DCF /* MockCloudKitInterface.swift */; };
 		4B5B33371D73F0E8006F4768 /* Radon-iOS.h in Headers */ = {isa = PBXBuildFile; fileRef = 4B5B33351D73F0E8006F4768 /* Radon-iOS.h */; };
+		4B702D541DBF57FC00CD2817 /* CloudKitInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B702D531DBF57FC00CD2817 /* CloudKitInterface.swift */; };
+		4B702D551DBF57FC00CD2817 /* CloudKitInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B702D531DBF57FC00CD2817 /* CloudKitInterface.swift */; };
 		4BB1E49C1BE61945000691F7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB1E49B1BE61945000691F7 /* AppDelegate.swift */; };
 		4BB1E49E1BE61945000691F7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB1E49D1BE61945000691F7 /* ViewController.swift */; };
 		4BB1E4A11BE61945000691F7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4BB1E49F1BE61945000691F7 /* Main.storyboard */; };
@@ -17,7 +19,7 @@
 		4BB1E4A61BE61945000691F7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4BB1E4A41BE61945000691F7 /* LaunchScreen.storyboard */; };
 		4BB1E4BD1BE619D5000691F7 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB1E4BC1BE619D5000691F7 /* CloudKit.framework */; };
 		4BD2E0BA1CDF0267009F5CF8 /* MockDefaultsStoreable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BD2E0B91CDF0267009F5CF8 /* MockDefaultsStoreable.swift */; };
-		4BFA0A831CF377A30079A96F /* CloudKitInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A811CF377A30079A96F /* CloudKitInterface.swift */; };
+		4BFA0A831CF377A30079A96F /* CloudInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A811CF377A30079A96F /* CloudInterface.swift */; };
 		4BFA0A851CF377A30079A96F /* Radon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A821CF377A30079A96F /* Radon.swift */; };
 		4BFA0A8A1CF378100079A96F /* ExampleRadonStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A871CF378100079A96F /* ExampleRadonStore.swift */; };
 		4BFA0A8C1CF378100079A96F /* TestClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A881CF378100079A96F /* TestClass.swift */; };
@@ -25,7 +27,7 @@
 		4BFA0A8E1CF3782B0079A96F /* ExampleRadonStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A871CF378100079A96F /* ExampleRadonStore.swift */; };
 		4BFA0A9B1CF378520079A96F /* Radon_iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BFA0A941CF378520079A96F /* Radon_iOS.framework */; };
 		4BFA0A9C1CF378520079A96F /* Radon_iOS.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4BFA0A941CF378520079A96F /* Radon_iOS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		4BFA0AA11CF378590079A96F /* CloudKitInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A811CF377A30079A96F /* CloudKitInterface.swift */; };
+		4BFA0AA11CF378590079A96F /* CloudInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A811CF377A30079A96F /* CloudInterface.swift */; };
 		4BFA0AA21CF3785C0079A96F /* Radon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFA0A821CF377A30079A96F /* Radon.swift */; };
 		64B6380B1D6F2ACA00868623 /* RadonStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64B6380A1D6F2ACA00868623 /* RadonStore.swift */; };
 		64B6380D1D6F2AFB00868623 /* Syncable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64B6380C1D6F2AFB00868623 /* Syncable.swift */; };
@@ -73,6 +75,7 @@
 		4B25B4C61CDD1CC900897DCF /* MockCloudKitInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MockCloudKitInterface.swift; sourceTree = "<group>"; };
 		4B5B33341D73F0E8006F4768 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = "Radon-iOS/Info.plist"; sourceTree = SOURCE_ROOT; };
 		4B5B33351D73F0E8006F4768 /* Radon-iOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Radon-iOS.h"; path = "Radon-iOS/Radon-iOS.h"; sourceTree = SOURCE_ROOT; };
+		4B702D531DBF57FC00CD2817 /* CloudKitInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CloudKitInterface.swift; path = Source/CloudKitInterface.swift; sourceTree = "<group>"; };
 		4BB1E4981BE61945000691F7 /* Radon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Radon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BB1E49B1BE61945000691F7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4BB1E49D1BE61945000691F7 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -83,7 +86,7 @@
 		4BB1E4BB1BE619CD000691F7 /* Radon.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Radon.entitlements; sourceTree = "<group>"; };
 		4BB1E4BC1BE619D5000691F7 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		4BD2E0B91CDF0267009F5CF8 /* MockDefaultsStoreable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MockDefaultsStoreable.swift; sourceTree = "<group>"; };
-		4BFA0A811CF377A30079A96F /* CloudKitInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CloudKitInterface.swift; path = Source/CloudKitInterface.swift; sourceTree = "<group>"; };
+		4BFA0A811CF377A30079A96F /* CloudInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CloudInterface.swift; path = Source/CloudInterface.swift; sourceTree = "<group>"; };
 		4BFA0A821CF377A30079A96F /* Radon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Radon.swift; path = Source/Radon.swift; sourceTree = "<group>"; };
 		4BFA0A871CF378100079A96F /* ExampleRadonStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExampleRadonStore.swift; sourceTree = "<group>"; };
 		4BFA0A881CF378100079A96F /* TestClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestClass.swift; sourceTree = "<group>"; };
@@ -174,11 +177,12 @@
 		4BFA0A801CF377830079A96F /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				4BFA0A811CF377A30079A96F /* CloudKitInterface.swift */,
+				4BFA0A811CF377A30079A96F /* CloudInterface.swift */,
 				4BFA0A821CF377A30079A96F /* Radon.swift */,
 				64B6380A1D6F2ACA00868623 /* RadonStore.swift */,
 				64B6380C1D6F2AFB00868623 /* Syncable.swift */,
 				64B638121D6F2E8E00868623 /* CloudKit+Radon.swift */,
+				4B702D531DBF57FC00CD2817 /* CloudKitInterface.swift */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -372,8 +376,9 @@
 				4BB1E49C1BE61945000691F7 /* AppDelegate.swift in Sources */,
 				4BFA0A8E1CF3782B0079A96F /* ExampleRadonStore.swift in Sources */,
 				64B6380B1D6F2ACA00868623 /* RadonStore.swift in Sources */,
-				4BFA0A831CF377A30079A96F /* CloudKitInterface.swift in Sources */,
+				4BFA0A831CF377A30079A96F /* CloudInterface.swift in Sources */,
 				4BFA0A8D1CF378270079A96F /* TestClass.swift in Sources */,
+				4B702D541DBF57FC00CD2817 /* CloudKitInterface.swift in Sources */,
 				64B638131D6F2E8E00868623 /* CloudKit+Radon.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -384,8 +389,9 @@
 			files = (
 				64B638111D6F2B0600868623 /* RadonStore.swift in Sources */,
 				64B638151D6F2EE200868623 /* CloudKit+Radon.swift in Sources */,
+				4B702D551DBF57FC00CD2817 /* CloudKitInterface.swift in Sources */,
 				4BFA0AA21CF3785C0079A96F /* Radon.swift in Sources */,
-				4BFA0AA11CF378590079A96F /* CloudKitInterface.swift in Sources */,
+				4BFA0AA11CF378590079A96F /* CloudInterface.swift in Sources */,
 				64B6380F1D6F2B0400868623 /* Syncable.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
