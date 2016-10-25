@@ -52,10 +52,10 @@ class MockRecord: Record {
 
 struct MockServerChangeToken: ServerChangeToken { }
 
-class MockCloudKitInterface: CloudKitInterface {
+class MockCloudKitInterface: CloudInterface {
     
     typealias RecordType = MockRecord
-    typealias ChangeToken = MockServerChangeToken 
+    typealias ChangeToken = MockServerChangeToken
     
     var failsSaveRecordZone = false
     var failsCreateRecord = false

@@ -51,7 +51,7 @@ extension UserDefaults: DefaultsStoreable {
     }
 }
 
-open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudKitInterface> {
+open class Radon<S: RadonStore, T:Syncable, InterfaceType: CloudInterface> {
     
     /// CompletionBlock: Simple typealias for a completionBlock taking an NSError optional.
     public typealias CompletionBlock = (_ error: Error?) -> ()

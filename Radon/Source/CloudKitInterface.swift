@@ -28,7 +28,7 @@ extension CKRecord: Record {
     }
 }
 
-public protocol CloudKitInterface {
+public protocol CloudInterface {
     
     associatedtype RecordType: Record
     associatedtype ChangeToken: ServerChangeToken
@@ -48,7 +48,7 @@ public protocol CloudKitInterface {
     func fetchUserRecordNameWithCompletionHandler(_ completionHandler: @escaping (String?, Error?) -> Void)
 }
 
-open class RadonCloudKit: CloudKitInterface {
+open class RadonCloudKit: CloudInterface {
     
     public typealias RecordType = CKRecord
     public typealias ChangeToken = CKServerChangeToken
