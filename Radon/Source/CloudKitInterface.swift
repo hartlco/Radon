@@ -38,7 +38,7 @@ open class RadonCloudKit: CloudInterface {
     
     public func setup(completion: (Error?) -> Void) {
         privateDatabase.save(syncableRecordZone) { (zone, error) -> Void in
-            print("CloudKit error: \(error)")
+            print("CloudKit error: \(error.debugDescription)")
         }
         
         subscribeToItemUpdates()
